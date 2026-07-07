@@ -4,7 +4,7 @@
 >
 > **Version:** 1.0
 >
-> **Status:** Approved for Implementation
+> **Status:** Approved requirements for a pre-implementation documentation-only repository
 >
 > **Document Owner:** Engineering
 >
@@ -14,7 +14,7 @@
 
 ## 1. Project Objective
 
-Build a production-quality Ruby on Rails API that periodically retrieves cryptocurrency prices from the CoinGecko API, stores the latest values, exposes a REST endpoint for retrieving prices, and continues serving the last known value if the external API becomes unavailable.
+Define and then build a production-quality Ruby on Rails API that periodically retrieves cryptocurrency prices from the CoinGecko API, stores the latest values, exposes a REST endpoint for retrieving prices, and continues serving the last known value if the external API becomes unavailable.
 
 The project must satisfy the interview requirements while demonstrating senior-level backend engineering practices.
 
@@ -200,27 +200,29 @@ Cache Service
 
 ## 8. Technology Stack
 
-Ruby
+Accepted target technologies:
 
-Rails API
+- Ruby
+- Rails API
+- PostgreSQL
+- ActiveJob abstraction
+- RSpec
+- Docker
+- GitHub Actions
+- RuboCop
+- Brakeman
+- SimpleCov
+- Faraday (HTTP client)
 
-PostgreSQL
+Proposed or deferred implementation decisions:
 
-ActiveJob
+- Concrete ActiveJob adapter
+- Scheduler implementation
+- Cache store backend
+- Redis usage, if any
+- Background worker process layout
 
-RSpec
-
-Docker
-
-GitHub Actions
-
-RuboCop
-
-Brakeman
-
-SimpleCov
-
-Faraday (HTTP client)
+These proposed or deferred decisions must be resolved in the relevant implementation phase before configuration or infrastructure is created.
 
 ---
 
@@ -242,12 +244,17 @@ Attributes
 
 Indexes
 
-- symbol
+- composite unique index on symbol, currency, and provider for current-price identity
+- supporting lookup index aligned with symbol, currency, and provider queries when needed
+
+A symbol-only lookup may be added only as a non-unique supporting index if query evidence requires it; it must not replace or conflict with composite uniqueness on symbol, currency, and provider.
 
 Validations
 
 - symbol required
 - price required
+- currency required
+- provider required
 
 ---
 
@@ -639,7 +646,6 @@ Create a production-ready Rails API project and establish the engineering standa
 ##### Documentation Updates
 
 - README.md
-- PROJECT_STRUCTURE.md
 - JUNIOR_DEVELOPER_GUIDE.md
 
 ##### Exit Criteria

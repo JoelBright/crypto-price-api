@@ -132,7 +132,7 @@ Do not create empty category headings.
 
 # 4. Unreleased
 
-> Changes listed here have been completed on the working branch but are not yet included in a tagged release.
+> Completed entries in this section describe documentation changes on the working branch that are not yet included in a tagged release. Planned entries describe future scope and must not be read as completed implementation.
 
 ## Added
 
@@ -153,7 +153,7 @@ Do not create empty category headings.
 
 - Rails API-only application foundation.
 - PostgreSQL persistence configuration.
-- Redis cache and background queue infrastructure.
+- Cache and background-processing infrastructure after the relevant technology decisions are accepted.
 - CoinGecko provider client.
 - Cache-first price query service.
 - Scheduled background price-refresh job.
@@ -170,7 +170,9 @@ Do not create empty category headings.
 > **Status:** Planned
 > **Release Date:** To be assigned after all release gates pass.
 
-## Added
+## Planned Added Scope
+
+> The following items are planned for Version 1.0.0 and are not completed implementation in the current documentation-only repository.
 
 ### API
 
@@ -214,7 +216,7 @@ Do not create empty category headings.
 
 - Scheduled price refresh every minute.
 - Background job delegation through ActiveJob.
-- Sidekiq-backed execution, subject to final scheduler decision verification.
+- Background job execution through the selected adapter; adapter, scheduler, worker process, and Redis decisions remain proposed or deferred until the background-processing phase.
 - Configurable symbol and currency refresh scope.
 - Bounded retry behaviour for transient failures.
 - Controlled handling of provider, cache, and persistence failures.
@@ -246,7 +248,7 @@ Do not create empty category headings.
 ### Developer Experience
 
 - Dockerfile for Rails application runtime.
-- Docker Compose environment for Rails, PostgreSQL, Redis, and background worker processes.
+- Docker Compose environment for Rails, PostgreSQL, and any accepted supporting services after infrastructure decisions are finalized.
 - `.env.example` with safe configuration placeholders.
 - `.gitignore` and `.dockerignore` secret and artifact protections.
 - Junior developer reconstruction guide.

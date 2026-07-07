@@ -21,7 +21,7 @@
 7. ADR-002 — PostgreSQL as Durable Price Storage
 8. ADR-003 — Cache-First Read Strategy
 9. ADR-004 — Background Refresh Instead of Request-Time Provider Calls
-10. ADR-005 — Redis for Cache and Background Queue Infrastructure
+10. ADR-005 — Cache and Background Infrastructure Backend
 11. ADR-006 — Service-Layer Orchestration
 12. ADR-007 — Repository Boundary for Persistence
 13. ADR-008 — Dedicated CoinGecko Provider Client
@@ -139,8 +139,9 @@ List links to related documentation.
 
 | Status     | Meaning                                                                          |
 | ---------- | -------------------------------------------------------------------------------- |
-| Proposed   | The decision is under consideration and has not yet been implemented.            |
-| Accepted   | The decision has been approved and is the current project approach.              |
+| Proposed   | The decision is under consideration and has not been approved as the project approach. |
+| Accepted   | The decision has been approved as the project approach; it may still be future implementation work when the repository is pre-implementation. |
+| Deferred   | The decision is intentionally postponed for a later phase or is out of current scope. |
 | Superseded | A newer decision has replaced this decision.                                     |
 | Deprecated | The decision remains documented for history but should not be used for new work. |
 | Rejected   | The option was considered but intentionally not selected.                        |
@@ -188,7 +189,7 @@ The following rules apply:
 | ADR-002 | PostgreSQL as Durable Price Storage                       | Accepted | 2026-07-07 | Persistence                 |
 | ADR-003 | Cache-First Read Strategy                                 | Accepted | 2026-07-07 | Performance and Reliability |
 | ADR-004 | Background Refresh Instead of Request-Time Provider Calls | Accepted | 2026-07-07 | Reliability                 |
-| ADR-005 | Redis for Cache and Background Queue Infrastructure       | Accepted | 2026-07-07 | Infrastructure              |
+| ADR-005 | Cache and Background Infrastructure Backend               | Proposed | 2026-07-07 | Infrastructure              |
 | ADR-006 | Service-Layer Orchestration                               | Accepted | 2026-07-07 | Architecture                |
 | ADR-007 | Repository Boundary for Persistence                       | Accepted | 2026-07-07 | Architecture                |
 | ADR-008 | Dedicated CoinGecko Provider Client                       | Accepted | 2026-07-07 | External Integration        |
@@ -431,12 +432,12 @@ The query service must:
 
 The selected approach separates speed from durability.
 
-Redis provides fast reads. PostgreSQL provides durable recovery.
+The accepted cache-first approach requires a cache abstraction for fast reads and PostgreSQL for durable recovery; the concrete cache backend remains proposed or deferred until its implementation decision is accepted.
 
 The application remains useful if:
 
 - Cache entries expire.
-- Redis restarts.
+- The accepted cache backend restarts.
 - Cache is temporarily unavailable.
 - The process restarts.
 
@@ -467,7 +468,7 @@ Affected areas:
 - `PriceCache`.
 - `PriceQueryService`.
 - `PriceRefreshService`.
-- Redis configuration.
+- Cache backend configuration after the backend decision is accepted.
 - Cache specifications.
 - Service specifications.
 - Request specifications.
@@ -523,7 +524,7 @@ Public API requests must read cached or persisted values only and must not call 
 | ------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------- |
 | Call CoinGecko for every API request | Always attempts to return current provider data.                          | Slow, provider-dependent, rate-limit risk, weak fallback behaviour. | Rejected |
 | Refresh only on cache miss           | Fewer scheduled processes.                                                | Cache miss can create user-facing provider latency and failure.     | Rejected |
-| Scheduled background refresh         | Predictable refresh cadence and provider isolation from public read path. | Requires worker, scheduler, Redis, and job tests.                   | Selected |
+| Scheduled background refresh         | Predictable refresh cadence and provider isolation from public read path. | Requires worker, scheduler, and job tests; concrete infrastructure remains deferred. | Selected |
 
 ## Rationale
 
@@ -557,12 +558,12 @@ The application can return the latest known valid value while a later scheduled 
 Affected areas:
 
 - `PriceRefreshJob`.
-- Sidekiq configuration.
-- Scheduler configuration.
+- Background adapter configuration after the adapter decision is accepted.
+- Scheduler configuration after the scheduler decision is accepted.
 - `PriceRefreshService`.
-- Redis infrastructure.
+- Supporting infrastructure after relevant decisions are accepted.
 - Background job and scheduler specs.
-- Docker Compose worker process.
+- Docker Compose worker process after the worker-layout decision is accepted.
 
 ## Verification
 
@@ -587,11 +588,11 @@ Affected areas:
 
 ---
 
-# 10. ADR-005 — Redis for Cache and Background Queue Infrastructure
+# 10. ADR-005 — Cache and Background Infrastructure Backend
 
 ## Status
 
-Accepted
+Proposed
 
 ## Date
 
@@ -599,16 +600,11 @@ Accepted
 
 ## Context
 
-The selected background-processing system requires a queue backend. The project also requires a fast cache layer.
-
-Using separate technologies for queue and cache would increase local-development complexity without a demonstrated need.
+The target application will require a cache strategy and may require a queue backend depending on the accepted background-processing adapter. The repository is currently pre-implementation and does not contain Redis, Sidekiq, scheduler, worker, Docker, or application configuration.
 
 ## Decision
 
-Use Redis for both:
-
-- Rails cache storage.
-- Sidekiq queue and scheduling infrastructure.
+Proposed decision: evaluate Redis as a candidate backend for cache storage and, if the accepted background adapter requires it, queue infrastructure. Redis is not yet an accepted implementation dependency and must not be configured before the relevant implementation decision is approved.
 
 ## Alternatives Considered
 
@@ -616,13 +612,11 @@ Use Redis for both:
 | ------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- | -------- |
 | Memory store cache with Redis queue   | Minimal cache setup.                                         | Cache is process-local and less representative of multi-process production behaviour.   | Rejected |
 | Separate queue and cache technologies | Strong separation of infrastructure responsibilities.        | Adds unnecessary services and setup complexity.                                         | Rejected |
-| Redis for cache and Sidekiq           | One shared infrastructure service with mature Rails support. | Redis availability affects cache and queue behaviour, requiring clear failure handling. | Selected |
+| Redis for cache and Sidekiq           | One shared infrastructure service with mature Rails support. | Redis availability affects cache and queue behaviour, requiring clear failure handling. | Proposed |
 
 ## Rationale
 
-Redis is a conventional choice for Rails projects using Sidekiq.
-
-Using it for both requirements keeps Docker Compose understandable while still reflecting a realistic multi-process application architecture.
+Redis is a conventional candidate for Rails projects using Sidekiq, but the background adapter and scheduler decision remains proposed. Any accepted infrastructure must remain understandable while reflecting a realistic application architecture.
 
 ## Consequences
 
@@ -630,34 +624,34 @@ Using it for both requirements keeps Docker Compose understandable while still r
 
 - Fewer local infrastructure services.
 - Shared configuration pattern.
-- Mature Rails and Sidekiq ecosystem support.
+- Mature Rails ecosystem support if selected.
 - Consistent Docker Compose setup.
 
 ### Trade-Offs
 
-- Redis outage affects both queueing and cache availability.
+- If Redis is selected for multiple responsibilities, Redis outage affects both queueing and cache availability.
 - Requires clear fallback to PostgreSQL for cache read failures.
 
 ### Risks
 
-- Redis eviction or restart can clear cache entries.
-- Redis misconfiguration can prevent jobs from running.
+- Redis eviction or restart can clear cache entries if Redis is selected.
+- Redis misconfiguration can prevent jobs from running if the selected background adapter depends on Redis.
 
 ## Implementation Impact
 
 Affected areas:
 
-- Docker Compose Redis service.
-- `config.cache_store`.
-- Sidekiq Redis connection.
-- Environment variables.
+- Candidate Docker Compose supporting service.
+- Candidate cache-store configuration.
+- Candidate queue backend configuration.
+- Environment variables after accepted configuration exists.
 - Cache and job resilience tests.
 
 ## Verification
 
-- Redis container reports healthy.
-- Rails cache reads and writes through Redis.
-- Sidekiq starts and connects to Redis.
+- Accepted cache backend reports healthy.
+- Rails cache reads and writes through the accepted backend.
+- Accepted background adapter starts and executes jobs.
 - Cache miss correctly recovers through PostgreSQL.
 
 ## Related Documents
@@ -669,10 +663,10 @@ Affected areas:
 
 ## Follow-Up Actions
 
-- [ ] Add Redis service to Docker Compose.
-- [ ] Configure Rails cache store.
-- [ ] Configure Sidekiq Redis URL.
-- [ ] Add Redis-related environment variables.
+- [ ] Decide whether Redis is accepted for cache, queue, both, or neither.
+- [ ] Configure Rails cache store after the decision is accepted.
+- [ ] Configure queue backend after the background adapter decision is accepted.
+- [ ] Add environment variables only after accepted configuration requires them.
 
 ---
 
@@ -1072,7 +1066,7 @@ flowchart LR
     ProviderData[Validated Provider Data]
     Persist[Persist to PostgreSQL]
     Persisted[Receive Persisted Record]
-    Cache[Update Redis Cache]
+    Cache[Update Application Cache]
     Complete[Complete Refresh]
 
     ProviderData --> Persist
@@ -1337,7 +1331,7 @@ The application also needs a recurring scheduler.
 
 ## Decision
 
-Use Sidekiq as the ActiveJob backend and Sidekiq Scheduler for recurring one-minute job scheduling.
+Proposed decision under review: use Sidekiq as the ActiveJob backend and Sidekiq Scheduler for recurring one-minute job scheduling. This is not accepted and must not be implemented until the decision is approved.
 
 ## Alternatives Considered
 

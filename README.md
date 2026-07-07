@@ -1,8 +1,8 @@
 # Cryptocurrency Price API
 
-A production-oriented Ruby on Rails API that retrieves cryptocurrency prices from CoinGecko, stores the latest known values, serves cached responses, and remains available when the external provider is temporarily unavailable.
+A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** In active implementation
+> **Project Status:** Pre-implementation documentation-only repository
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -62,11 +62,13 @@ A production-oriented Ruby on Rails API that retrieves cryptocurrency prices fro
 
 # Project Overview
 
-The Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
+The repository is currently in a pre-implementation documentation-only state. It contains committed Markdown documentation and `.gitignore`; it does not yet contain Rails application source, Docker configuration, CI configuration, application configuration, dependency manifests, or background-processing infrastructure.
 
-The application separates external provider communication from client-facing API requests.
+The target Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
 
-Instead of calling CoinGecko whenever an API consumer requests a price, the application refreshes prices in the background, persists the latest successful value, updates a cache, and serves that stored value through the public API.
+The target application separates external provider communication from client-facing API requests.
+
+Instead of calling CoinGecko whenever an API consumer requests a price, the target application refreshes prices in the background, persists the latest successful value, updates a cache, and serves that stored value through the public API.
 
 This approach improves response time, reduces dependency on external-provider availability during user requests, and allows the application to continue serving the last known price when CoinGecko is unavailable.
 
@@ -90,7 +92,7 @@ The project must also demonstrate production-quality engineering practices, incl
 
 # Solution Overview
 
-The API follows a cache-first, background-refresh architecture.
+The target API follows a cache-first, background-refresh architecture. This is an intended design shape, not an implemented application state.
 
 ```mermaid
 flowchart LR
@@ -110,7 +112,7 @@ flowchart LR
     RefreshService --> Cache
 ```
 
-The API request path does not depend on a live CoinGecko response.
+In the target design, the API request path does not depend on a live CoinGecko response.
 
 This design ensures that a temporary upstream outage does not unnecessarily make the public API unavailable.
 
@@ -133,7 +135,7 @@ The read path follows this order:
 
 ## Background Price Refresh
 
-A scheduled background job retrieves prices from CoinGecko every minute.
+The target design requires a scheduled background job to retrieve prices from CoinGecko every minute. The scheduler, queue adapter, worker process layout, and supporting infrastructure remain deferred until the background-processing implementation phase.
 
 A successful refresh performs the following actions:
 
@@ -159,7 +161,7 @@ When CoinGecko is unavailable, slow, malformed, or otherwise fails:
 
 ## Consistent API Responses
 
-The API returns predictable JSON responses for successful requests and failure conditions.
+The target API returns predictable JSON responses for successful requests and failure conditions.
 
 Target successful response:
 
@@ -297,8 +299,8 @@ sequenceDiagram
 | Language               | Ruby                                             | Primary application language.                                           |
 | Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, ActiveJob, configuration, and conventions. |
 | Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.             |
-| Background Processing  | ActiveJob with a configured adapter              | Background job abstraction for price-refresh execution.                 |
-| Scheduling             | Scheduler implementation selected during Phase 5 | Enqueues the refresh job every minute.                                  |
+| Background Processing  | ActiveJob with a configured adapter              | Target abstraction for price-refresh execution; concrete adapter decision is deferred. |
+| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.  |
 | HTTP Client            | Faraday                                          | External communication with CoinGecko.                                  |
 | Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                            |
 | Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.            |
@@ -315,7 +317,7 @@ Exact dependency versions will be recorded in `Gemfile.lock` after the Rails app
 
 # Repository Structure
 
-The repository is organized to separate application code, public documentation, and development governance artifacts.
+The target repository structure below shows the intended implementation shape. The current committed repository is documentation-only and does not yet contain the Rails, Docker, CI, dependency, or application-configuration files shown in this target tree.
 
 ```text
 crypto-price-api/
@@ -385,7 +387,7 @@ The final structure may include small Rails-conventional additions as implementa
 
 ## Prerequisites
 
-Install the following tools before running the project locally:
+After Phase 1 creates the application foundation, install the following tools before running the project locally:
 
 - Git
 - Docker Desktop or Docker Engine with Docker Compose
@@ -418,7 +420,7 @@ Replace the repository URL if the final GitHub repository uses a different organ
 
 ## Configure Environment Variables
 
-Create a local environment file from the supplied example:
+After `.env.example` is created in the application foundation phase, create a local environment file from the supplied example:
 
 ```bash
 cp .env.example .env

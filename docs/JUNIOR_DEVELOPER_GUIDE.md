@@ -2,9 +2,9 @@
 
 > **Document Purpose**
 >
-> This guide enables a junior developer to recreate the Cryptocurrency Price API from an empty directory while understanding the engineering decisions behind each implementation step.
+> This guide describes the target reconstruction path for the Cryptocurrency Price API from an empty directory while explaining the engineering decisions behind each implementation step.
 >
-> Follow the sections in order. Do not skip verification steps. Each chapter builds on the previous chapter and leaves the repository in a working state.
+> Follow the sections in order during implementation. Do not skip verification steps. Each chapter is intended to build on the previous chapter and leave the repository in a working state after the required files exist.
 >
 > This guide explains **how to build the project**. The authoritative requirements remain in `PROJECT_SPECIFICATIONS.md`.
 
@@ -16,7 +16,7 @@
 2. What You Will Build
 3. Learning Objectives
 4. Prerequisites
-5. Final Technology Choices
+5. Target and Proposed Technology Choices
 6. Project Architecture at a Glance
 7. Build Sequence
 8. Create the Repository
@@ -64,7 +64,7 @@ Do not mark a chapter as complete merely because files exist. A chapter is compl
 
 # 2. What You Will Build
 
-You will build a Rails API that returns the latest known cryptocurrency price for a configured symbol.
+The target implementation will build a Rails API that returns the latest known cryptocurrency price for a configured symbol. The current repository is documentation-only and does not yet contain the files or commands this guide will create.
 
 The application will:
 
@@ -89,9 +89,9 @@ flowchart TD
     Consumer[API Consumer]
     Endpoint[GET /prices/:symbol]
     QueryService[PriceQueryService]
-    Cache[Redis Cache]
+    Cache[Application Cache]
     Database[(PostgreSQL)]
-    Scheduler[Sidekiq Scheduler]
+    Scheduler[Selected Scheduler]
     Job[PriceRefreshJob]
     RefreshService[PriceRefreshService]
     CoinGecko[CoinGecko API]
@@ -211,32 +211,27 @@ Create a local `.env` file later in the guide. Do not paste the real key into:
 
 ---
 
-# 5. Final Technology Choices
+# 5. Target and Proposed Technology Choices
 
-This guide uses the following concrete implementation choices.
+This guide uses accepted target choices where decisions are approved and marks unresolved implementation choices as proposed or deferred.
 
 | Concern                    | Selected Technology       | Why                                                                              |
 | -------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
 | Web framework              | Rails API mode            | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions. |
 | Durable storage            | PostgreSQL                | Reliable relational storage and a realistic production database.                 |
-| Background execution       | Sidekiq through ActiveJob | Mature queued-job processing with clear retry behaviour.                         |
-| Scheduling                 | Sidekiq Scheduler         | Enqueues jobs every minute without coupling scheduling to HTTP requests.         |
-| Background queue and cache | Redis                     | Required by Sidekiq and useful as a shared Rails cache store.                    |
+| Background execution       | ActiveJob adapter to be selected | ActiveJob is the accepted abstraction; concrete adapter decision is proposed/deferred. |
+| Scheduling                 | Scheduler to be selected         | A scheduler is required; concrete scheduler decision is proposed/deferred.             |
+| Background queue and cache | Backend to be selected           | Cache and queue infrastructure must be accepted before configuration is created.       |
 | HTTP client                | Faraday                   | Explicit timeout configuration and testable provider communication.              |
 | Test framework             | RSpec                     | Standard Ruby behaviour-driven testing.                                          |
 | Test fixtures              | FactoryBot                | Clear, repeatable model creation.                                                |
 | Coverage                   | SimpleCov                 | Enforces test-coverage visibility.                                               |
 | Linting                    | RuboCop                   | Ruby code-quality checks.                                                        |
 | Security scanning          | Brakeman                  | Rails-focused static security analysis.                                          |
-| Containers                 | Docker Compose            | Reproducible services for Rails, PostgreSQL, Redis, Sidekiq, and scheduler.      |
+| Containers                 | Docker Compose            | Target reproducible services after supporting-service decisions are accepted.      |
 | CI                         | GitHub Actions            | Automated checks on remote pushes and pull requests.                             |
 
-These choices intentionally add Redis because it serves two legitimate responsibilities:
-
-1. Sidekiq queue storage.
-2. Shared cache storage.
-
-Avoid adding a separate cache-only service or queue-only service because Redis already supports both needs for this project.
+Redis, Sidekiq, Solid Queue, scheduler configuration, worker processes, and background Docker services are unresolved at the documentation-only stage. Select and document those decisions in the Engineering Journal before adding implementation files or infrastructure.
 
 ---
 
@@ -256,7 +251,7 @@ flowchart LR
     Model[CryptoPrice]
     Database[(PostgreSQL)]
     Job[PriceRefreshJob]
-    Scheduler[Sidekiq Scheduler]
+    Scheduler[Selected Scheduler]
     Provider[CoinGecko API]
 
     Client --> Controller
@@ -284,11 +279,11 @@ flowchart LR
 | `PriceQueryService`     | Finds cache or persisted prices for API reads.                     |
 | `PriceRefreshService`   | Fetches, validates, persists, and caches new prices.               |
 | `CryptoPriceRepository` | Encapsulates ActiveRecord queries and upserts.                     |
-| `PriceCache`            | Encapsulates Redis cache keys and cache reads/writes.              |
+| `PriceCache`            | Encapsulates cache keys and cache reads/writes for the accepted cache backend. |
 | `CoinGeckoClient`       | Encapsulates external HTTP requests and provider response parsing. |
 | `CryptoPrice`           | Represents durable price data.                                     |
 | `PriceRefreshJob`       | Delegates refresh work to the refresh service.                     |
-| Sidekiq Scheduler       | Enqueues refresh jobs every minute.                                |
+| Selected Scheduler      | Enqueues refresh jobs every minute after the scheduler decision is accepted. |
 
 A simple rule helps prevent architecture drift:
 
@@ -306,7 +301,7 @@ flowchart TD
     Persistence[Database, Model, Repository, Cache]
     Provider[CoinGecko Client]
     Services[Query and Refresh Services]
-    Background[Sidekiq and Scheduled Job]
+    Background[Selected Background Adapter and Scheduled Job]
     API[HTTP Endpoint]
     Tests[Automated Test Suite]
     CI[Docker and Continuous Integration]
@@ -472,7 +467,6 @@ Create `.env.example`:
 ```dotenv
 RAILS_ENV=development
 DATABASE_URL=postgresql://postgres:postgres@db:5432/crypto_price_api_development
-REDIS_URL=redis://redis:6379/0
 COINGECKO_API_KEY=replace_with_your_coingecko_api_key
 PRICE_REFRESH_SYMBOLS=btc,eth
 PRICE_REFRESH_CURRENCY=usd
@@ -679,7 +673,7 @@ The application needs durable storage because cached values alone cannot guarant
 
 ```mermaid
 flowchart LR
-    Cache[Redis Cache]
+    Cache[Application Cache]
     Database[(PostgreSQL)]
     API[Price API]
 
@@ -784,9 +778,7 @@ Add the following dependencies to the `Gemfile`.
 
 ```ruby
 gem "faraday"
-gem "redis"
-gem "sidekiq"
-gem "sidekiq-scheduler"
+# Add cache, queue, and scheduler gems only after those decisions are accepted.
 gem "dotenv-rails", groups: [:development, :test]
 
 group :development, :test do
@@ -813,9 +805,7 @@ bundle install
 | Gem                 | Responsibility                                           |
 | ------------------- | -------------------------------------------------------- |
 | `faraday`           | Makes configurable and testable HTTP calls to CoinGecko. |
-| `redis`             | Connects Rails cache and Sidekiq to Redis.               |
-| `sidekiq`           | Executes queued background jobs.                         |
-| `sidekiq-scheduler` | Enqueues recurring jobs.                                 |
+| Accepted cache/queue backend gems | Added only after the cache, queue, and scheduler decisions are accepted. |
 | `dotenv-rails`      | Loads local `.env` values in development and test only.  |
 | `rspec-rails`       | Provides RSpec integration with Rails.                   |
 | `factory_bot_rails` | Creates test records predictably.                        |
@@ -833,7 +823,6 @@ Do not add gems “just in case.” Every dependency increases maintenance and s
 
 ```bash
 bundle exec ruby -e "require 'faraday'; puts Faraday::VERSION"
-bundle exec ruby -e "require 'sidekiq'; puts Sidekiq::VERSION"
 bundle exec brakeman --version
 bundle exec rubocop --version
 ```
@@ -858,7 +847,7 @@ git commit -m "chore: add application and quality dependencies"
 
 ## Goal
 
-Run the web API, PostgreSQL, Redis, Sidekiq worker, and scheduler through Docker Compose.
+Run the web API, PostgreSQL, and any accepted cache, queue, worker, or scheduler services through Docker Compose after those infrastructure decisions are approved.
 
 ---
 
@@ -868,25 +857,25 @@ The application has multiple processes:
 
 - Rails web server.
 - PostgreSQL.
-- Redis.
-- Sidekiq worker.
-- Scheduler.
+- Accepted cache or queue backend, if selected.
+- Accepted background worker, if selected.
+- Accepted scheduler, if selected.
 
 Docker Compose makes these dependencies explicit and reproducible.
 
 ```mermaid
 flowchart LR
     Web[web<br/>Rails API]
-    Worker[worker<br/>Sidekiq]
+    Worker[worker<br/>Accepted Adapter]
     Scheduler[scheduler<br/>Recurring Jobs]
     Database[(db<br/>PostgreSQL)]
-    Redis[(redis<br/>Redis)]
+    CacheQueue[(accepted cache/queue backend)]
 
     Web --> Database
-    Web --> Redis
+    Web --> CacheQueue
     Worker --> Database
-    Worker --> Redis
-    Scheduler --> Redis
+    Worker --> CacheQueue
+    Scheduler --> CacheQueue
 ```
 
 ---
@@ -955,16 +944,6 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   web:
     build: .
     command: >
@@ -974,7 +953,7 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
-      REDIS_URL: redis://redis:6379/0
+      # Add cache or queue backend URLs only after those decisions are accepted.
     ports:
       - "3000:3000"
     volumes:
@@ -983,32 +962,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
 
-  worker:
-    build: .
-    command: bundle exec sidekiq -C config/sidekiq.yml
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
-      REDIS_URL: redis://redis:6379/0
-    volumes:
-      - .:/app
-      - bundle_cache:/usr/local/bundle
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+  # Add worker, scheduler, and cache/queue backend services only after those decisions are accepted.
 
 volumes:
   postgres_data:
   bundle_cache:
 ```
 
-The scheduler configuration will be added later through Sidekiq Scheduler. It runs inside the Sidekiq worker process rather than requiring a separate container.
+The scheduler configuration must be added only after the scheduler and worker-process decisions are accepted and recorded.
 
 ---
 
@@ -1027,9 +989,8 @@ docker compose ps
 Expected result:
 
 - `db` is healthy.
-- `redis` is healthy.
 - `web` is running.
-- `worker` is running.
+- Accepted supporting services are healthy, if configured.
 
 ---
 
@@ -1245,4 +1206,4 @@ git commit -m "chore: configure RSpec coverage and quality checks"
 
 > Continue with the next part of this guide after completing and verifying Sections 1–13.
 >
-> The next section creates `CryptoPrice`, its migration, database constraints, FactoryBot factory, repository boundary, Redis cache abstraction, provider client, services, Sidekiq schedule, API endpoint, complete tests, CI workflow, and release validation.
+> The next section creates `CryptoPrice`, its migration, database constraints, FactoryBot factory, repository boundary, accepted cache abstraction, provider client, services, accepted scheduling approach, API endpoint, complete tests, CI workflow, and release validation.

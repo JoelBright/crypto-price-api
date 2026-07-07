@@ -82,7 +82,9 @@ Do not begin implementation until the relevant requirements and acceptance crite
 
 # 3. Repository Orientation
 
-The repository separates production application code, public technical documentation, and development-governance artifacts.
+Current state: this repository is pre-implementation and documentation-only. It currently contains committed Markdown documentation and `.gitignore`; it does not yet contain Rails application source, Docker configuration, CI configuration, application configuration, dependency manifests, or background-processing infrastructure.
+
+Target state: after implementation begins, the repository will separate production application code, public technical documentation, and development-governance artifacts.
 
 ```mermaid
 flowchart TD
@@ -116,18 +118,20 @@ flowchart TD
 | `app/jobs/`          | Background-job orchestration.                                             |
 | `app/models/`        | Persisted domain entities and validations.                                |
 | `spec/`              | Automated test suite organized by architectural boundary.                 |
-| `docs/`              | Documentation explaining the completed system.                            |
+| `docs/`              | Documentation explaining requirements, target design, and later implementation details. |
 | `development/`       | Engineering workflow, quality standards, planning, and release artifacts. |
-| `docker/`            | Docker-related support files, if required.                                |
-| `.github/workflows/` | Continuous integration workflows.                                         |
+| `docker/`            | Target Docker-related support files, if required after Docker setup exists. |
+| `.github/workflows/` | Target continuous integration workflows after CI setup exists.             |
 
 ---
 
 # 4. Development Setup
 
+> The commands in this section are target implementation commands. They become executable only after the relevant foundation tasks create Rails, Docker, environment, dependency, and test tooling files. Documentation-only changes should use Markdown validation and Git diff checks instead.
+
 ## Prerequisites
 
-You need:
+After the application foundation exists, you need:
 
 - Git
 - Docker and Docker Compose
@@ -145,7 +149,7 @@ git clone git@github.com:JoelBright/crypto-price-api.git
 cd crypto-price-api
 ```
 
-Create local environment configuration:
+After `.env.example` exists, create local environment configuration:
 
 ```bash
 cp .env.example .env
@@ -180,7 +184,7 @@ docker compose run --rm web bundle exec rubocop
 docker compose run --rm web bundle exec brakeman
 ```
 
-A contribution should not begin until the current branch can pass the project quality checks.
+An implementation contribution should not be marked complete until the relevant project quality checks exist and pass. For pre-implementation documentation work, run available Markdown checks and Git diff validation instead.
 
 ---
 
@@ -569,7 +573,7 @@ Never commit:
 - Real CoinGecko API keys
 - `config/master.key`
 - Production database credentials
-- Redis credentials
+- accepted cache or queue backend credentials
 - GitHub access tokens
 - Session keys
 - Any copied output containing secrets
