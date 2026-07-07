@@ -12,14 +12,9 @@
 
 # Rails runtime artifacts
 /log/*
-!/log/.keep
 /tmp/*
-!/tmp/.keep
-!/tmp/pids/
 /tmp/pids/*
-!/tmp/pids/.keep
 /storage/*
-!/storage/.keep
 /coverage/
 /.bundle/
 /vendor/bundle/
