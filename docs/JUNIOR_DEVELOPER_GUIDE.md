@@ -1,0 +1,1248 @@
+# JUNIOR_DEVELOPER_GUIDE.md
+
+> **Document Purpose**
+>
+> This guide enables a junior developer to recreate the Cryptocurrency Price API from an empty directory while understanding the engineering decisions behind each implementation step.
+>
+> Follow the sections in order. Do not skip verification steps. Each chapter builds on the previous chapter and leaves the repository in a working state.
+>
+> This guide explains **how to build the project**. The authoritative requirements remain in `PROJECT_SPECIFICATIONS.md`.
+
+---
+
+# Table of Contents
+
+1. How to Use This Guide
+2. What You Will Build
+3. Learning Objectives
+4. Prerequisites
+5. Final Technology Choices
+6. Project Architecture at a Glance
+7. Build Sequence
+8. Create the Repository
+9. Generate the Rails API
+10. Configure PostgreSQL
+11. Add Development Tooling
+12. Configure Docker and Local Services
+13. Configure RSpec and Quality Gates
+14. Create the Data Model
+15. Implement the Persistence and Cache Boundaries
+16. Implement the CoinGecko Provider Client
+17. Implement Application Services
+18. Configure Background Processing
+19. Implement the HTTP API
+20. Add Automated Tests
+21. Configure Continuous Integration
+22. Verify Failure Recovery
+23. Complete Documentation and Release Checks
+24. Troubleshooting Guide
+25. Final Recreation Checklist
+
+---
+
+# 1. How to Use This Guide
+
+This guide is written for a developer who starts with:
+
+- An empty local directory.
+- A GitHub account or another Git hosting service.
+- A working development machine.
+- Basic familiarity with the terminal.
+- Basic familiarity with Ruby and Rails concepts.
+
+Each chapter follows the same structure:
+
+1. **Goal** — what the chapter accomplishes.
+2. **Why this exists** — why the implementation decision matters.
+3. **Commands and files** — the work to perform.
+4. **Verification** — how to prove the step worked.
+5. **Common mistakes** — mistakes to avoid before continuing.
+
+Do not mark a chapter as complete merely because files exist. A chapter is complete only when its verification command succeeds.
+
+---
+
+# 2. What You Will Build
+
+You will build a Rails API that returns the latest known cryptocurrency price for a configured symbol.
+
+The application will:
+
+- Expose `GET /prices/:symbol`.
+- Read prices from cache first.
+- Fall back to PostgreSQL when cache data is unavailable.
+- Refresh configured prices every minute in a background process.
+- Fetch fresh data from CoinGecko.
+- Persist valid provider results.
+- Update cache only after persistence succeeds.
+- Continue serving the last known price if CoinGecko fails.
+- Include automated tests for caching, jobs, fallback behaviour, provider failures, and HTTP responses.
+- Run locally with Docker.
+- Run quality checks through GitHub Actions.
+
+---
+
+## Final Behaviour
+
+```mermaid
+flowchart TD
+    Consumer[API Consumer]
+    Endpoint[GET /prices/:symbol]
+    QueryService[PriceQueryService]
+    Cache[Redis Cache]
+    Database[(PostgreSQL)]
+    Scheduler[Sidekiq Scheduler]
+    Job[PriceRefreshJob]
+    RefreshService[PriceRefreshService]
+    CoinGecko[CoinGecko API]
+
+    Consumer --> Endpoint
+    Endpoint --> QueryService
+    QueryService --> Cache
+    QueryService --> Database
+
+    Scheduler --> Job
+    Job --> RefreshService
+    RefreshService --> CoinGecko
+    RefreshService --> Database
+    RefreshService --> Cache
+```
+
+The important design rule is:
+
+> Public API requests return known values. Background processing obtains new values.
+
+This keeps a temporary CoinGecko outage from making the public endpoint unavailable.
+
+---
+
+# 3. Learning Objectives
+
+By completing this guide, you should understand:
+
+- How to create an API-only Rails application.
+- Why a controller should remain thin.
+- Why services coordinate application behaviour.
+- Why repositories isolate database queries.
+- Why a dedicated provider client isolates third-party HTTP concerns.
+- Why cache and durable storage solve different problems.
+- Why background jobs should delegate rather than contain business logic.
+- How graceful degradation improves reliability.
+- How RSpec tests map to system responsibilities.
+- How Docker and CI make a project reproducible.
+
+---
+
+# 4. Prerequisites
+
+## Required Tools
+
+Install the following before starting.
+
+| Tool                            | Purpose                             |
+| ------------------------------- | ----------------------------------- |
+| Git                             | Source control.                     |
+| Ruby                            | Application runtime.                |
+| Bundler                         | Ruby dependency management.         |
+| PostgreSQL                      | Durable application database.       |
+| Docker Desktop or Docker Engine | Reproducible local environment.     |
+| Docker Compose                  | Runs application services together. |
+| A Git hosting account           | Remote repository and CI.           |
+| curl                            | Local API verification.             |
+
+---
+
+## Verify Installed Tools
+
+Run the following commands:
+
+```bash
+git --version
+ruby --version
+bundle --version
+docker --version
+docker compose version
+curl --version
+```
+
+Expected result:
+
+- Each command returns a version.
+- No command returns `command not found`.
+- Docker is running before you continue.
+
+---
+
+## Recommended Ruby Version
+
+Use the Ruby version defined by the project’s `.ruby-version` file.
+
+For this project, use Ruby `3.4.x` unless your team deliberately selects another supported version and records that decision in `ENGINEERING_JOURNAL.md`.
+
+Create the version file:
+
+```bash
+printf "3.4.4\n" > .ruby-version
+```
+
+Verify:
+
+```bash
+ruby --version
+cat .ruby-version
+```
+
+The major and minor Ruby versions should align.
+
+---
+
+## Required CoinGecko Credential
+
+The provider credential must be treated as a secret.
+
+Create a local `.env` file later in the guide. Do not paste the real key into:
+
+- Git commits.
+- Source code.
+- Documentation examples.
+- Screenshots.
+- Chat logs intended for public sharing.
+- CI configuration files without secure-secret storage.
+
+---
+
+# 5. Final Technology Choices
+
+This guide uses the following concrete implementation choices.
+
+| Concern                    | Selected Technology       | Why                                                                              |
+| -------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| Web framework              | Rails API mode            | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions. |
+| Durable storage            | PostgreSQL                | Reliable relational storage and a realistic production database.                 |
+| Background execution       | Sidekiq through ActiveJob | Mature queued-job processing with clear retry behaviour.                         |
+| Scheduling                 | Sidekiq Scheduler         | Enqueues jobs every minute without coupling scheduling to HTTP requests.         |
+| Background queue and cache | Redis                     | Required by Sidekiq and useful as a shared Rails cache store.                    |
+| HTTP client                | Faraday                   | Explicit timeout configuration and testable provider communication.              |
+| Test framework             | RSpec                     | Standard Ruby behaviour-driven testing.                                          |
+| Test fixtures              | FactoryBot                | Clear, repeatable model creation.                                                |
+| Coverage                   | SimpleCov                 | Enforces test-coverage visibility.                                               |
+| Linting                    | RuboCop                   | Ruby code-quality checks.                                                        |
+| Security scanning          | Brakeman                  | Rails-focused static security analysis.                                          |
+| Containers                 | Docker Compose            | Reproducible services for Rails, PostgreSQL, Redis, Sidekiq, and scheduler.      |
+| CI                         | GitHub Actions            | Automated checks on remote pushes and pull requests.                             |
+
+These choices intentionally add Redis because it serves two legitimate responsibilities:
+
+1. Sidekiq queue storage.
+2. Shared cache storage.
+
+Avoid adding a separate cache-only service or queue-only service because Redis already supports both needs for this project.
+
+---
+
+# 6. Project Architecture at a Glance
+
+The project uses a layered architecture.
+
+```mermaid
+flowchart LR
+    Client[API Consumer]
+    Controller[PricesController]
+    QueryService[PriceQueryService]
+    RefreshService[PriceRefreshService]
+    Repository[CryptoPriceRepository]
+    Cache[PriceCache]
+    ProviderClient[CoinGeckoClient]
+    Model[CryptoPrice]
+    Database[(PostgreSQL)]
+    Job[PriceRefreshJob]
+    Scheduler[Sidekiq Scheduler]
+    Provider[CoinGecko API]
+
+    Client --> Controller
+    Controller --> QueryService
+    QueryService --> Cache
+    QueryService --> Repository
+    Repository --> Model
+    Model --> Database
+
+    Scheduler --> Job
+    Job --> RefreshService
+    RefreshService --> ProviderClient
+    RefreshService --> Repository
+    RefreshService --> Cache
+    ProviderClient --> Provider
+```
+
+---
+
+## Responsibilities
+
+| Component               | Responsibility                                                     |
+| ----------------------- | ------------------------------------------------------------------ |
+| `PricesController`      | Accepts HTTP requests and renders HTTP responses.                  |
+| `PriceQueryService`     | Finds cache or persisted prices for API reads.                     |
+| `PriceRefreshService`   | Fetches, validates, persists, and caches new prices.               |
+| `CryptoPriceRepository` | Encapsulates ActiveRecord queries and upserts.                     |
+| `PriceCache`            | Encapsulates Redis cache keys and cache reads/writes.              |
+| `CoinGeckoClient`       | Encapsulates external HTTP requests and provider response parsing. |
+| `CryptoPrice`           | Represents durable price data.                                     |
+| `PriceRefreshJob`       | Delegates refresh work to the refresh service.                     |
+| Sidekiq Scheduler       | Enqueues refresh jobs every minute.                                |
+
+A simple rule helps prevent architecture drift:
+
+> Every production class must exist because it has a clearly defined responsibility documented in `PROJECT_SPECIFICATIONS.md`, and every production class must have a corresponding test and documentation reference before it is introduced.
+
+---
+
+# 7. Build Sequence
+
+Build the project in the following order.
+
+```mermaid
+flowchart TD
+    Foundation[Repository and Rails Foundation]
+    Persistence[Database, Model, Repository, Cache]
+    Provider[CoinGecko Client]
+    Services[Query and Refresh Services]
+    Background[Sidekiq and Scheduled Job]
+    API[HTTP Endpoint]
+    Tests[Automated Test Suite]
+    CI[Docker and Continuous Integration]
+    Release[Release Verification]
+
+    Foundation --> Persistence
+    Persistence --> Provider
+    Provider --> Services
+    Services --> Background
+    Background --> API
+    API --> Tests
+    Tests --> CI
+    CI --> Release
+```
+
+Do not begin a later stage before the previous stage has been verified.
+
+---
+
+# 8. Create the Repository
+
+## Goal
+
+Create an empty Git repository with a predictable directory structure and secret-safe ignore rules.
+
+---
+
+## Why This Exists
+
+Version control is not just backup storage.
+
+A clean repository:
+
+- Documents development history.
+- Allows safe rollback.
+- Supports code review.
+- Enables CI.
+- Prevents secrets and generated artifacts from being committed.
+
+---
+
+## Create the Project Directory
+
+```bash
+mkdir crypto-price-api
+cd crypto-price-api
+git init
+git branch -M main
+```
+
+Verify:
+
+```bash
+git status
+git branch --show-current
+```
+
+Expected result:
+
+```text
+main
+```
+
+---
+
+## Create Initial Directory Structure
+
+```bash
+mkdir -p docs development docker .github/workflows
+```
+
+Create the project documentation files:
+
+```bash
+touch README.md
+touch docs/PROJECT_SPECIFICATIONS.md
+touch docs/ARCHITECTURE.md
+touch docs/DATABASE.md
+touch docs/API.md
+touch docs/BACKGROUND_JOBS.md
+touch docs/TESTING.md
+touch docs/JUNIOR_DEVELOPER_GUIDE.md
+touch docs/ENGINEERING_JOURNAL.md
+touch development/IMPLEMENTATION_ROADMAP.md
+touch development/IMPLEMENTATION_WORK_BREAKDOWN.md
+touch development/ENGINEERING_PRINCIPLES.md
+touch development/FEATURE_CHECKLIST.md
+touch development/RELEASE_CHECKLIST.md
+```
+
+At this stage, copy the completed governance and documentation files into their intended locations.
+
+---
+
+## Create `.gitignore`
+
+Create `.gitignore`:
+
+```gitignore
+/.bundle
+/.env
+/.env.*
+!/\.env.example
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+/coverage
+/vendor/bundle
+/public/packs
+/public/assets
+.byebug_history
+.DS_Store
+/config/master.key
+```
+
+Why these rules matter:
+
+| Ignore Rule         | Reason                                         |
+| ------------------- | ---------------------------------------------- |
+| `.env`              | Prevents secrets from entering source control. |
+| `config/master.key` | Protects Rails encrypted credentials.          |
+| `coverage`          | Generated test-report output.                  |
+| `log` and `tmp`     | Runtime artifacts.                             |
+| `vendor/bundle`     | Local dependency installation.                 |
+| `.DS_Store`         | macOS filesystem metadata.                     |
+
+---
+
+## Create `.dockerignore`
+
+Create `.dockerignore`:
+
+```dockerignore
+.git
+.github
+.bundle
+.env
+.env.*
+coverage
+log
+tmp
+storage
+vendor
+node_modules
+README.md
+docs
+development
+```
+
+The Docker ignore file reduces unnecessary build context size and avoids copying secrets into images.
+
+Do not exclude application code, `Gemfile`, `Gemfile.lock`, or required configuration files.
+
+---
+
+## Create `.env.example`
+
+Create `.env.example`:
+
+```dotenv
+RAILS_ENV=development
+DATABASE_URL=postgresql://postgres:postgres@db:5432/crypto_price_api_development
+REDIS_URL=redis://redis:6379/0
+COINGECKO_API_KEY=replace_with_your_coingecko_api_key
+PRICE_REFRESH_SYMBOLS=btc,eth
+PRICE_REFRESH_CURRENCY=usd
+PRICE_REFRESH_INTERVAL_SECONDS=60
+PRICE_REFRESH_MAX_RETRIES=3
+```
+
+Create your local secret file:
+
+```bash
+cp .env.example .env
+```
+
+Then update only your local `.env` with the actual CoinGecko credential.
+
+Verify the secret file is ignored:
+
+```bash
+git status --ignored
+```
+
+You should see `.env` listed as ignored, not as an untracked file.
+
+---
+
+## First Documentation Commit
+
+Before generating Rails, commit the project governance artifacts.
+
+```bash
+git add README.md docs development .gitignore .dockerignore .env.example .ruby-version
+git commit -m "chore: establish engineering documentation foundation"
+```
+
+Verify:
+
+```bash
+git log --oneline --max-count=1
+git status
+```
+
+Expected result:
+
+- The latest commit message is visible.
+- `git status` reports a clean working tree.
+
+---
+
+## Common Mistakes
+
+- Committing `.env`.
+- Committing a real API key into `README.md` or a shell-history screenshot.
+- Creating files outside the repository root.
+- Forgetting to create a `main` branch.
+- Starting application code before committing the documentation foundation.
+
+---
+
+# 9. Generate the Rails API
+
+## Goal
+
+Create an API-only Rails application that uses PostgreSQL.
+
+---
+
+## Why API Mode?
+
+Rails API mode removes browser-oriented middleware and generated view layers that this project does not need.
+
+This project exposes JSON endpoints only.
+
+```mermaid
+flowchart LR
+    BrowserViews[Browser Views and Assets]
+    APIOnly[Rails API Mode]
+    JSON[JSON Responses]
+    Controllers[Controllers]
+    Services[Services]
+
+    BrowserViews -. Not required .-> APIOnly
+    APIOnly --> JSON
+    APIOnly --> Controllers
+    APIOnly --> Services
+```
+
+---
+
+## Generate the Application
+
+Run this command from the repository root:
+
+```bash
+rails new . \
+  --api \
+  --database=postgresql \
+  --skip-test \
+  --skip-jbuilder \
+  --skip-system-test \
+  --skip-action-mailbox \
+  --skip-action-text \
+  --skip-active-storage
+```
+
+### What Each Option Means
+
+| Option                  | Meaning                                                         |
+| ----------------------- | --------------------------------------------------------------- |
+| `.`                     | Generate Rails into the current repository directory.           |
+| `--api`                 | Create an API-only Rails application.                           |
+| `--database=postgresql` | Configure PostgreSQL instead of SQLite.                         |
+| `--skip-test`           | Skip Rails’ default Minitest because this project uses RSpec.   |
+| `--skip-jbuilder`       | Avoid Jbuilder because response serialization will be explicit. |
+| `--skip-system-test`    | Skip browser test setup; this is an API-only project.           |
+| `--skip-action-mailbox` | Exclude email-receiving feature not required here.              |
+| `--skip-action-text`    | Exclude rich-text feature not required here.                    |
+| `--skip-active-storage` | Exclude file-upload storage not required here.                  |
+
+Do not use `--minimal` because it can remove useful Rails defaults and create additional configuration work.
+
+---
+
+## Verify Rails Generation
+
+Run:
+
+```bash
+bin/rails --version
+bin/rails routes
+```
+
+Expected result:
+
+- Rails prints a version.
+- Routes command executes successfully, even if only default routes exist initially.
+
+Check the generated application structure:
+
+```bash
+find app config db -maxdepth 2 -type d | sort
+```
+
+Expected directories include:
+
+```text
+app
+app/controllers
+app/models
+config
+config/environments
+db
+db/migrate
+```
+
+---
+
+## Restore Documentation Files if Needed
+
+Rails generation may create or replace project files.
+
+Verify the documentation remains present:
+
+```bash
+find docs development -maxdepth 1 -type f | sort
+```
+
+If any document was replaced, restore it from your previous commit:
+
+```bash
+git checkout HEAD -- docs development README.md
+```
+
+---
+
+## Commit Rails Foundation
+
+```bash
+git add .
+git commit -m "chore: generate Rails API foundation"
+```
+
+Verify:
+
+```bash
+git status
+git log --oneline --max-count=2
+```
+
+---
+
+# 10. Configure PostgreSQL
+
+## Goal
+
+Configure Rails to use PostgreSQL in development, test, and production-like container environments.
+
+---
+
+## Why PostgreSQL?
+
+PostgreSQL is selected because it is a production-grade relational database with strong constraints, decimal support, indexing, and predictable SQL behaviour.
+
+The application needs durable storage because cached values alone cannot guarantee recovery after expiration or cache loss.
+
+```mermaid
+flowchart LR
+    Cache[Redis Cache]
+    Database[(PostgreSQL)]
+    API[Price API]
+
+    API --> Cache
+    Cache -. Cache miss .-> Database
+    Database --> API
+```
+
+---
+
+## Configure `config/database.yml`
+
+Replace the generated local development configuration with environment-driven settings.
+
+Use this target shape:
+
+```yaml
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  url: <%= ENV["DATABASE_URL"] %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  url: <%= ENV.fetch("TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/crypto_price_api_test") %>
+
+production:
+  <<: *default
+```
+
+## Why Environment-Driven Configuration?
+
+Environment-driven configuration lets the same source code run:
+
+- On a local host machine.
+- In Docker.
+- In continuous integration.
+- In a deployed environment.
+
+The database URL changes by environment, but the application code does not.
+
+---
+
+## Prepare Local PostgreSQL Without Docker
+
+Only perform this section if you are running PostgreSQL directly on your machine.
+
+Create the databases:
+
+```bash
+bin/rails db:create
+bin/rails db:prepare
+```
+
+Verify:
+
+```bash
+bin/rails db:version
+```
+
+---
+
+## Verify Database Configuration Later Through Docker
+
+The primary local workflow in this project uses Docker Compose.
+
+After Docker is configured, verify database connectivity with:
+
+```bash
+docker compose exec web bin/rails db:prepare
+docker compose exec web bin/rails db:version
+```
+
+Do not continue to database-model work until one of these verification paths works.
+
+---
+
+## Commit Database Configuration
+
+```bash
+git add config/database.yml
+git commit -m "chore: configure PostgreSQL environments"
+```
+
+---
+
+# 11. Add Development Tooling
+
+## Goal
+
+Add the libraries required for HTTP communication, jobs, scheduling, caching, testing, coverage, linting, and security scanning.
+
+---
+
+## Update `Gemfile`
+
+Add the following dependencies to the `Gemfile`.
+
+```ruby
+gem "faraday"
+gem "redis"
+gem "sidekiq"
+gem "sidekiq-scheduler"
+gem "dotenv-rails", groups: [:development, :test]
+
+group :development, :test do
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "simplecov", require: false
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "brakeman", require: false
+end
+```
+
+Then install dependencies:
+
+```bash
+bundle install
+```
+
+---
+
+## Why Each Dependency Exists
+
+| Gem                 | Responsibility                                           |
+| ------------------- | -------------------------------------------------------- |
+| `faraday`           | Makes configurable and testable HTTP calls to CoinGecko. |
+| `redis`             | Connects Rails cache and Sidekiq to Redis.               |
+| `sidekiq`           | Executes queued background jobs.                         |
+| `sidekiq-scheduler` | Enqueues recurring jobs.                                 |
+| `dotenv-rails`      | Loads local `.env` values in development and test only.  |
+| `rspec-rails`       | Provides RSpec integration with Rails.                   |
+| `factory_bot_rails` | Creates test records predictably.                        |
+| `faker`             | Optional realistic non-production test values.           |
+| `simplecov`         | Produces coverage reports.                               |
+| `rubocop`           | Checks Ruby style and quality.                           |
+| `rubocop-rails`     | Adds Rails-aware RuboCop checks.                         |
+| `brakeman`          | Scans Rails code for security concerns.                  |
+
+Do not add gems “just in case.” Every dependency increases maintenance and security responsibility.
+
+---
+
+## Verify Installed Dependencies
+
+```bash
+bundle exec ruby -e "require 'faraday'; puts Faraday::VERSION"
+bundle exec ruby -e "require 'sidekiq'; puts Sidekiq::VERSION"
+bundle exec brakeman --version
+bundle exec rubocop --version
+```
+
+Expected result:
+
+- Each command prints a version.
+- No command reports a missing gem.
+
+---
+
+## Commit Tooling
+
+```bash
+git add Gemfile Gemfile.lock
+git commit -m "chore: add application and quality dependencies"
+```
+
+---
+
+# 12. Configure Docker and Local Services
+
+## Goal
+
+Run the web API, PostgreSQL, Redis, Sidekiq worker, and scheduler through Docker Compose.
+
+---
+
+## Why Docker Compose?
+
+The application has multiple processes:
+
+- Rails web server.
+- PostgreSQL.
+- Redis.
+- Sidekiq worker.
+- Scheduler.
+
+Docker Compose makes these dependencies explicit and reproducible.
+
+```mermaid
+flowchart LR
+    Web[web<br/>Rails API]
+    Worker[worker<br/>Sidekiq]
+    Scheduler[scheduler<br/>Recurring Jobs]
+    Database[(db<br/>PostgreSQL)]
+    Redis[(redis<br/>Redis)]
+
+    Web --> Database
+    Web --> Redis
+    Worker --> Database
+    Worker --> Redis
+    Scheduler --> Redis
+```
+
+---
+
+## Create `Dockerfile`
+
+Create `Dockerfile`:
+
+```dockerfile
+FROM ruby:3.4.4-slim
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      libpq-dev \
+      postgresql-client \
+      curl && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle config set path /usr/local/bundle && \
+    bundle install
+
+COPY . .
+
+RUN useradd --create-home appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 3000
+
+CMD ["bin/rails", "server", "-b", "0.0.0.0"]
+```
+
+### Why This Dockerfile Uses a Non-Root User
+
+Running application containers as a non-root user reduces avoidable security risk.
+
+The project does not need root privileges at runtime.
+
+---
+
+## Create `docker-compose.yml`
+
+Create `docker-compose.yml`:
+
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crypto_price_api_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U postgres -d crypto_price_api_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    command: >
+      sh -c "bin/rails db:prepare &&
+             bin/rails server -b 0.0.0.0"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  bundle_cache:
+```
+
+The scheduler configuration will be added later through Sidekiq Scheduler. It runs inside the Sidekiq worker process rather than requiring a separate container.
+
+---
+
+## Build and Start Services
+
+```bash
+docker compose up --build
+```
+
+In another terminal, verify the containers:
+
+```bash
+docker compose ps
+```
+
+Expected result:
+
+- `db` is healthy.
+- `redis` is healthy.
+- `web` is running.
+- `worker` is running.
+
+---
+
+## Verify Rails Inside Docker
+
+```bash
+docker compose exec web bin/rails about
+docker compose exec web bin/rails db:prepare
+```
+
+Verify the web process responds:
+
+```bash
+curl --include http://localhost:3000/up
+```
+
+A Rails health endpoint should return a successful response once the generated application is running.
+
+---
+
+## Stop Services
+
+```bash
+docker compose down
+```
+
+To remove persistent local database data:
+
+```bash
+docker compose down --volumes
+```
+
+Use the second command carefully because it deletes the local PostgreSQL volume.
+
+---
+
+## Commit Docker Foundation
+
+```bash
+git add Dockerfile docker-compose.yml
+git commit -m "chore: add Docker development environment"
+```
+
+---
+
+# 13. Configure RSpec and Quality Gates
+
+## Goal
+
+Replace default Rails testing with RSpec, configure coverage, configure linting, and configure security scanning.
+
+---
+
+## Install RSpec
+
+Run:
+
+```bash
+docker compose run --rm web bin/rails generate rspec:install
+```
+
+Expected generated files:
+
+```text
+.rspec
+spec/spec_helper.rb
+spec/rails_helper.rb
+```
+
+---
+
+## Configure SimpleCov
+
+At the very top of `spec/spec_helper.rb`, before Rails or application code is loaded, add:
+
+```ruby
+require "simplecov"
+
+SimpleCov.start "rails" do
+  enable_coverage :branch
+  minimum_coverage line: 95
+  minimum_coverage_by_file 85
+end
+```
+
+Why must this come first?
+
+SimpleCov can only measure files loaded after coverage tracking begins.
+
+---
+
+## Configure FactoryBot
+
+In `spec/rails_helper.rb`, inside `RSpec.configure`, add:
+
+```ruby
+config.include FactoryBot::Syntax::Methods
+```
+
+This allows tests to use:
+
+```ruby
+create(:crypto_price)
+```
+
+instead of:
+
+```ruby
+FactoryBot.create(:crypto_price)
+```
+
+Use the shorter form only when it remains clear.
+
+---
+
+## Create `.rubocop.yml`
+
+Create `.rubocop.yml`:
+
+```yaml
+plugins:
+  - rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  Exclude:
+    - "bin/**/*"
+    - "db/schema.rb"
+    - "vendor/**/*"
+
+Layout/LineLength:
+  Max: 100
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+
+Style/Documentation:
+  Enabled: false
+```
+
+The project does not require comments on every class. It requires clear code and documentation where architecture or operations need explanation.
+
+---
+
+## Verify RSpec
+
+Create a temporary smoke spec:
+
+```bash
+mkdir -p spec/smoke
+```
+
+Create `spec/smoke/application_spec.rb`:
+
+```ruby
+require "rails_helper"
+
+RSpec.describe "application boot" do
+  it "loads the Rails application" do
+    expect(Rails.application).to be_present
+  end
+end
+```
+
+Run:
+
+```bash
+docker compose run --rm web bundle exec rspec
+```
+
+Expected result:
+
+```text
+1 example, 0 failures
+```
+
+Delete the smoke test later only if it no longer provides value. It is acceptable to retain a simple application-boot verification.
+
+---
+
+## Verify RuboCop
+
+```bash
+docker compose run --rm web bundle exec rubocop
+```
+
+Fix issues intentionally rather than applying automatic corrections without review.
+
+---
+
+## Verify Brakeman
+
+```bash
+docker compose run --rm web bundle exec brakeman
+```
+
+At this early stage, the scan should complete with no critical unresolved findings.
+
+---
+
+## Commit Testing Foundation
+
+```bash
+git add .rspec .rubocop.yml spec
+git commit -m "chore: configure RSpec coverage and quality checks"
+```
+
+---
+
+# 14. Create the Data Model
+
+> Continue with the next part of this guide after completing and verifying Sections 1–13.
+>
+> The next section creates `CryptoPrice`, its migration, database constraints, FactoryBot factory, repository boundary, Redis cache abstraction, provider client, services, Sidekiq schedule, API endpoint, complete tests, CI workflow, and release validation.
