@@ -489,8 +489,6 @@ The following documents shall be updated.
 
 README.md
 
-PROJECT_STRUCTURE.md
-
 JUNIOR_DEVELOPER_GUIDE.md
 
 ENGINEERING_JOURNAL.md
