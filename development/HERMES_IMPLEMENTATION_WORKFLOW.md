@@ -395,7 +395,7 @@ Never push directly to main.
 
 ## Pull Request
 
-Create Pull Request.
+Create Pull Request by populateing the repository Pull Request template completely.
 
 Required:
 

@@ -172,6 +172,10 @@ Perform:
 - push
 - Pull Request creation
 
+Create the Pull Request using the repository PR template.
+- Populate every section.
+- Do not leave sections empty.
+
 Do not merge.
 
 Stop after providing:
