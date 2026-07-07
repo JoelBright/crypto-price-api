@@ -294,22 +294,22 @@ sequenceDiagram
 
 # Technology Stack
 
-| Category               | Technology                                       | Purpose                                                                 |
-| ---------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
-| Language               | Ruby                                             | Primary application language.                                           |
-| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, ActiveJob, configuration, and conventions. |
-| Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.             |
+| Category               | Technology                                       | Purpose                                                                                |
+| ---------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Language               | Ruby                                             | Primary application language.                                                          |
+| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, ActiveJob, configuration, and conventions.                |
+| Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                            |
 | Background Processing  | ActiveJob with a configured adapter              | Target abstraction for price-refresh execution; concrete adapter decision is deferred. |
-| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.  |
-| HTTP Client            | Faraday                                          | External communication with CoinGecko.                                  |
-| Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                            |
-| Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.            |
-| Test Data              | FactoryBot                                       | Consistent test object creation.                                        |
-| Coverage               | SimpleCov                                        | Test coverage reporting and threshold enforcement.                      |
-| Linting                | RuboCop                                          | Ruby style and static analysis.                                         |
-| Security Scanning      | Brakeman                                         | Rails-focused static security analysis.                                 |
-| Containers             | Docker and Docker Compose                        | Reproducible local development environment.                             |
-| Continuous Integration | GitHub Actions                                   | Automated test, lint, and security verification.                        |
+| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.                 |
+| HTTP Client            | Faraday                                          | External communication with CoinGecko.                                                 |
+| Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                           |
+| Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                           |
+| Test Data              | FactoryBot                                       | Consistent test object creation.                                                       |
+| Coverage               | SimpleCov                                        | Test coverage reporting and threshold enforcement.                                     |
+| Linting                | RuboCop                                          | Ruby style and static analysis.                                                        |
+| Security Scanning      | Brakeman                                         | Rails-focused static security analysis.                                                |
+| Containers             | Docker and Docker Compose                        | Reproducible local development environment.                                            |
+| Continuous Integration | GitHub Actions                                   | Automated test, lint, and security verification.                                       |
 
 Exact dependency versions will be recorded in `Gemfile.lock` after the Rails application foundation is generated.
 

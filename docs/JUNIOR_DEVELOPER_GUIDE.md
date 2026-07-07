@@ -215,21 +215,21 @@ Create a local `.env` file later in the guide. Do not paste the real key into:
 
 This guide uses accepted target choices where decisions are approved and marks unresolved implementation choices as proposed or deferred.
 
-| Concern                    | Selected Technology       | Why                                                                              |
-| -------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
-| Web framework              | Rails API mode            | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions. |
-| Durable storage            | PostgreSQL                | Reliable relational storage and a realistic production database.                 |
+| Concern                    | Selected Technology              | Why                                                                                    |
+| -------------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
+| Web framework              | Rails API mode                   | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions.       |
+| Durable storage            | PostgreSQL                       | Reliable relational storage and a realistic production database.                       |
 | Background execution       | ActiveJob adapter to be selected | ActiveJob is the accepted abstraction; concrete adapter decision is proposed/deferred. |
 | Scheduling                 | Scheduler to be selected         | A scheduler is required; concrete scheduler decision is proposed/deferred.             |
 | Background queue and cache | Backend to be selected           | Cache and queue infrastructure must be accepted before configuration is created.       |
-| HTTP client                | Faraday                   | Explicit timeout configuration and testable provider communication.              |
-| Test framework             | RSpec                     | Standard Ruby behaviour-driven testing.                                          |
-| Test fixtures              | FactoryBot                | Clear, repeatable model creation.                                                |
-| Coverage                   | SimpleCov                 | Enforces test-coverage visibility.                                               |
-| Linting                    | RuboCop                   | Ruby code-quality checks.                                                        |
-| Security scanning          | Brakeman                  | Rails-focused static security analysis.                                          |
-| Containers                 | Docker Compose            | Target reproducible services after supporting-service decisions are accepted.      |
-| CI                         | GitHub Actions            | Automated checks on remote pushes and pull requests.                             |
+| HTTP client                | Faraday                          | Explicit timeout configuration and testable provider communication.                    |
+| Test framework             | RSpec                            | Standard Ruby behaviour-driven testing.                                                |
+| Test fixtures              | FactoryBot                       | Clear, repeatable model creation.                                                      |
+| Coverage                   | SimpleCov                        | Enforces test-coverage visibility.                                                     |
+| Linting                    | RuboCop                          | Ruby code-quality checks.                                                              |
+| Security scanning          | Brakeman                         | Rails-focused static security analysis.                                                |
+| Containers                 | Docker Compose                   | Target reproducible services after supporting-service decisions are accepted.          |
+| CI                         | GitHub Actions                   | Automated checks on remote pushes and pull requests.                                   |
 
 Redis, Sidekiq, Solid Queue, scheduler configuration, worker processes, and background Docker services are unresolved at the documentation-only stage. Select and document those decisions in the Engineering Journal before adding implementation files or infrastructure.
 
@@ -273,17 +273,17 @@ flowchart LR
 
 ## Responsibilities
 
-| Component               | Responsibility                                                     |
-| ----------------------- | ------------------------------------------------------------------ |
-| `PricesController`      | Accepts HTTP requests and renders HTTP responses.                  |
-| `PriceQueryService`     | Finds cache or persisted prices for API reads.                     |
-| `PriceRefreshService`   | Fetches, validates, persists, and caches new prices.               |
-| `CryptoPriceRepository` | Encapsulates ActiveRecord queries and upserts.                     |
+| Component               | Responsibility                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `PricesController`      | Accepts HTTP requests and renders HTTP responses.                              |
+| `PriceQueryService`     | Finds cache or persisted prices for API reads.                                 |
+| `PriceRefreshService`   | Fetches, validates, persists, and caches new prices.                           |
+| `CryptoPriceRepository` | Encapsulates ActiveRecord queries and upserts.                                 |
 | `PriceCache`            | Encapsulates cache keys and cache reads/writes for the accepted cache backend. |
-| `CoinGeckoClient`       | Encapsulates external HTTP requests and provider response parsing. |
-| `CryptoPrice`           | Represents durable price data.                                     |
-| `PriceRefreshJob`       | Delegates refresh work to the refresh service.                     |
-| Selected Scheduler      | Enqueues refresh jobs every minute after the scheduler decision is accepted. |
+| `CoinGeckoClient`       | Encapsulates external HTTP requests and provider response parsing.             |
+| `CryptoPrice`           | Represents durable price data.                                                 |
+| `PriceRefreshJob`       | Delegates refresh work to the refresh service.                                 |
+| Selected Scheduler      | Enqueues refresh jobs every minute after the scheduler decision is accepted.   |
 
 A simple rule helps prevent architecture drift:
 
@@ -802,18 +802,18 @@ bundle install
 
 ## Why Each Dependency Exists
 
-| Gem                 | Responsibility                                           |
-| ------------------- | -------------------------------------------------------- |
-| `faraday`           | Makes configurable and testable HTTP calls to CoinGecko. |
+| Gem                               | Responsibility                                                           |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `faraday`                         | Makes configurable and testable HTTP calls to CoinGecko.                 |
 | Accepted cache/queue backend gems | Added only after the cache, queue, and scheduler decisions are accepted. |
-| `dotenv-rails`      | Loads local `.env` values in development and test only.  |
-| `rspec-rails`       | Provides RSpec integration with Rails.                   |
-| `factory_bot_rails` | Creates test records predictably.                        |
-| `faker`             | Optional realistic non-production test values.           |
-| `simplecov`         | Produces coverage reports.                               |
-| `rubocop`           | Checks Ruby style and quality.                           |
-| `rubocop-rails`     | Adds Rails-aware RuboCop checks.                         |
-| `brakeman`          | Scans Rails code for security concerns.                  |
+| `dotenv-rails`                    | Loads local `.env` values in development and test only.                  |
+| `rspec-rails`                     | Provides RSpec integration with Rails.                                   |
+| `factory_bot_rails`               | Creates test records predictably.                                        |
+| `faker`                           | Optional realistic non-production test values.                           |
+| `simplecov`                       | Produces coverage reports.                                               |
+| `rubocop`                         | Checks Ruby style and quality.                                           |
+| `rubocop-rails`                   | Adds Rails-aware RuboCop checks.                                         |
+| `brakeman`                        | Scans Rails code for security concerns.                                  |
 
 Do not add gems “just in case.” Every dependency increases maintenance and security responsibility.
 

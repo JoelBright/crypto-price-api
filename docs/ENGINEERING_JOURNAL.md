@@ -137,14 +137,14 @@ List links to related documentation.
 
 # 3. Decision Status Definitions
 
-| Status     | Meaning                                                                          |
-| ---------- | -------------------------------------------------------------------------------- |
-| Proposed   | The decision is under consideration and has not been approved as the project approach. |
+| Status     | Meaning                                                                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proposed   | The decision is under consideration and has not been approved as the project approach.                                                        |
 | Accepted   | The decision has been approved as the project approach; it may still be future implementation work when the repository is pre-implementation. |
-| Deferred   | The decision is intentionally postponed for a later phase or is out of current scope. |
-| Superseded | A newer decision has replaced this decision.                                     |
-| Deprecated | The decision remains documented for history but should not be used for new work. |
-| Rejected   | The option was considered but intentionally not selected.                        |
+| Deferred   | The decision is intentionally postponed for a later phase or is out of current scope.                                                         |
+| Superseded | A newer decision has replaced this decision.                                                                                                  |
+| Deprecated | The decision remains documented for history but should not be used for new work.                                                              |
+| Rejected   | The option was considered but intentionally not selected.                                                                                     |
 
 ---
 
@@ -520,10 +520,10 @@ Public API requests must read cached or persisted values only and must not call 
 
 ## Alternatives Considered
 
-| Alternative                          | Benefits                                                                  | Drawbacks                                                           | Decision |
-| ------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------- |
-| Call CoinGecko for every API request | Always attempts to return current provider data.                          | Slow, provider-dependent, rate-limit risk, weak fallback behaviour. | Rejected |
-| Refresh only on cache miss           | Fewer scheduled processes.                                                | Cache miss can create user-facing provider latency and failure.     | Rejected |
+| Alternative                          | Benefits                                                                  | Drawbacks                                                                            | Decision |
+| ------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
+| Call CoinGecko for every API request | Always attempts to return current provider data.                          | Slow, provider-dependent, rate-limit risk, weak fallback behaviour.                  | Rejected |
+| Refresh only on cache miss           | Fewer scheduled processes.                                                | Cache miss can create user-facing provider latency and failure.                      | Rejected |
 | Scheduled background refresh         | Predictable refresh cadence and provider isolation from public read path. | Requires worker, scheduler, and job tests; concrete infrastructure remains deferred. | Selected |
 
 ## Rationale

@@ -109,19 +109,19 @@ flowchart TD
 
 ## Important Directories
 
-| Directory            | Responsibility                                                            |
-| -------------------- | ------------------------------------------------------------------------- |
-| `app/controllers/`   | HTTP request handling and response rendering.                             |
-| `app/services/`      | Application workflow and business orchestration.                          |
-| `app/clients/`       | CoinGecko communication and provider-specific parsing.                    |
-| `app/repositories/`  | ActiveRecord query and persistence boundaries.                            |
-| `app/jobs/`          | Background-job orchestration.                                             |
-| `app/models/`        | Persisted domain entities and validations.                                |
-| `spec/`              | Automated test suite organized by architectural boundary.                 |
+| Directory            | Responsibility                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `app/controllers/`   | HTTP request handling and response rendering.                                           |
+| `app/services/`      | Application workflow and business orchestration.                                        |
+| `app/clients/`       | CoinGecko communication and provider-specific parsing.                                  |
+| `app/repositories/`  | ActiveRecord query and persistence boundaries.                                          |
+| `app/jobs/`          | Background-job orchestration.                                                           |
+| `app/models/`        | Persisted domain entities and validations.                                              |
+| `spec/`              | Automated test suite organized by architectural boundary.                               |
 | `docs/`              | Documentation explaining requirements, target design, and later implementation details. |
-| `development/`       | Engineering workflow, quality standards, planning, and release artifacts. |
-| `docker/`            | Target Docker-related support files, if required after Docker setup exists. |
-| `.github/workflows/` | Target continuous integration workflows after CI setup exists.             |
+| `development/`       | Engineering workflow, quality standards, planning, and release artifacts.               |
+| `docker/`            | Target Docker-related support files, if required after Docker setup exists.             |
+| `.github/workflows/` | Target continuous integration workflows after CI setup exists.                          |
 
 ---
 
