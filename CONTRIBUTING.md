@@ -82,7 +82,7 @@ Do not begin implementation until the relevant requirements and acceptance crite
 
 # 3. Repository Orientation
 
-Current state: this repository is pre-implementation and documentation-only. It currently contains committed Markdown documentation and `.gitignore`; it does not yet contain Rails application source, Docker configuration, CI configuration, application configuration, dependency manifests, or background-processing infrastructure.
+Current state: this repository contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, `.env.example`, and project documentation. It does not yet contain Docker configuration, CI configuration, domain models, provider clients, service/repository layers, API feature endpoints, or background-processing infrastructure.
 
 Target state: after implementation begins, the repository will separate production application code, public technical documentation, and development-governance artifacts.
 
@@ -134,11 +134,11 @@ flowchart TD
 After the application foundation exists, you need:
 
 - Git
-- Docker and Docker Compose
 - Ruby version defined in `.ruby-version`
 - Bundler
-- A valid local `.env` file
-- A CoinGecko API key for manual provider verification only
+- PostgreSQL
+- A valid local `.env` file copied from `.env.example`
+- A CoinGecko API key only when a later provider-integration issue requires manual verification
 
 ## Initial Setup
 
@@ -159,32 +159,35 @@ Update `.env` with valid local values.
 
 Do not commit `.env`.
 
-Start the local environment:
+Install dependencies and prepare the database:
 
 ```bash
-docker compose up --build
+bundle install
+bin/rails db:prepare
 ```
 
-Prepare the database:
+Run the Rails foundation locally:
 
 ```bash
-docker compose exec web bin/rails db:prepare
+bin/rails server
 ```
 
 Run the test suite:
 
 ```bash
-docker compose run --rm web bundle exec rspec
+bundle exec rspec
 ```
 
-Run static analysis:
+Run static analysis and security checks:
 
 ```bash
-docker compose run --rm web bundle exec rubocop
-docker compose run --rm web bundle exec brakeman
+bundle exec rubocop
+bundle exec brakeman
 ```
 
-An implementation contribution should not be marked complete until the relevant project quality checks exist and pass. For pre-implementation documentation work, run available Markdown checks and Git diff validation instead.
+Docker commands must not be documented as current setup commands until Docker support is implemented in its own issue.
+
+An implementation contribution should not be marked complete until the relevant project quality checks exist and pass. For documentation-only work, run available Markdown checks and Git diff validation instead.
 
 ---
 

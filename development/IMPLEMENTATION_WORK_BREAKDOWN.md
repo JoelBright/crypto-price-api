@@ -120,11 +120,11 @@ Establish a production-ready engineering environment before any business functio
 
 | ID      | Task                              | Priority | Depends On | Related Requirements | Verification                   | Status |
 | ------- | --------------------------------- | -------- | ---------- | -------------------- | ------------------------------ | ------ |
-| FND-006 | Generate Rails API project        | Critical | FND-001    | NFR-001              | Application boots              | ☐      |
-| FND-007 | Configure PostgreSQL              | Critical | FND-006    | NFR-001              | Database connection verified   | ☐      |
-| FND-008 | Configure development environment | High     | FND-006    | NFR-001              | Rails server starts            | ☐      |
-| FND-009 | Configure test environment        | High     | FND-006    | NFR-011              | Test environment verified      | ☐      |
-| FND-010 | Configure production environment  | Medium   | FND-006    | NFR-013              | Environment loads successfully | ☐      |
+| FND-006 | Generate Rails API project        | Critical | FND-001    | NFR-001              | Application boots              | ☑      |
+| FND-007 | Configure PostgreSQL              | Critical | FND-006    | NFR-001              | Database connection verified   | ☑      |
+| FND-008 | Configure development environment | High     | FND-006    | NFR-001              | Rails server starts            | ☑      |
+| FND-009 | Configure test environment        | High     | FND-006    | NFR-011              | Test environment verified      | ☑      |
+| FND-010 | Configure production environment  | Medium   | FND-006    | NFR-013              | Environment loads successfully | ☑      |
 
 ---
 
@@ -132,10 +132,10 @@ Establish a production-ready engineering environment before any business functio
 
 | ID      | Task                     | Priority | Depends On | Related Requirements | Verification            | Status |
 | ------- | ------------------------ | -------- | ---------- | -------------------- | ----------------------- | ------ |
-| FND-011 | Configure Ruby version   | High     | FND-006    | NFR-001              | Ruby version verified   | ☐      |
-| FND-012 | Configure Bundler        | High     | FND-011    | NFR-001              | Bundle install succeeds | ☐      |
-| FND-013 | Configure project gems   | High     | FND-012    | NFR-001              | Dependencies installed  | ☐      |
-| FND-014 | Lock dependency versions | Medium   | FND-013    | NFR-001              | Gemfile.lock committed  | ☐      |
+| FND-011 | Configure Ruby version   | High     | FND-006    | NFR-001              | Ruby version verified   | ☑      |
+| FND-012 | Configure Bundler        | High     | FND-011    | NFR-001              | Bundle install succeeds | ☑      |
+| FND-013 | Configure project gems   | High     | FND-012    | NFR-001              | Dependencies installed  | ☑      |
+| FND-014 | Lock dependency versions | Medium   | FND-013    | NFR-001              | Gemfile.lock committed  | ☑      |
 
 ---
 
@@ -154,7 +154,7 @@ Establish a production-ready engineering environment before any business functio
 
 | ID      | Task                 | Priority | Depends On | Related Requirements | Verification               | Status |
 | ------- | -------------------- | -------- | ---------- | -------------------- | -------------------------- | ------ |
-| FND-019 | Configure RSpec      | Critical | FND-006    | NFR-011              | Sample spec passes         | ☐      |
+| FND-019 | Configure RSpec      | Critical | FND-006    | NFR-011              | Sample spec passes         | ☑      |
 | FND-020 | Configure RuboCop    | High     | FND-019    | NFR-009              | Lint passes                | ☐      |
 | FND-021 | Configure Brakeman   | High     | FND-019    | NFR-010              | Security scan passes       | ☐      |
 | FND-022 | Configure SimpleCov  | High     | FND-019    | NFR-011              | Coverage report generated  | ☐      |
