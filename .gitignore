@@ -1,3 +1,24 @@
 /.hermes/
 /development/HERMES_WORKLOG.md
 /development/HERMES_HANDOFF.md
+
+# Local environment and secrets
+/.env
+/.env.*
+!/.env.example
+/config/master.key
+/config/credentials/*.key
+/config/credentials/**/*.key
+
+# Rails runtime artifacts
+/log/*
+/tmp/*
+/tmp/pids/*
+/storage/*
+/coverage/
+/.bundle/
+/vendor/bundle/
+
+# Local editor and OS artifacts
+.byebug_history
+.DS_Store

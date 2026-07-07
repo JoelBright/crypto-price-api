@@ -2,7 +2,7 @@
 
 A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** Pre-implementation documentation-only repository
+> **Project Status:** Rails API foundation implemented; domain, provider, API endpoint, background processing, Docker, and CI remain deferred
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -31,7 +31,7 @@ A planned production-oriented Ruby on Rails API that will retrieve cryptocurrenc
   - [Prerequisites](#prerequisites)
   - [Clone the Repository](#clone-the-repository)
   - [Configure Environment Variables](#configure-environment-variables)
-  - [Start with Docker](#start-with-docker)
+  - [Docker](#docker)
   - [Start without Docker](#start-without-docker)
   - [Run the Test Suite](#run-the-test-suite)
 - [Configuration](#configuration)
@@ -62,7 +62,7 @@ A planned production-oriented Ruby on Rails API that will retrieve cryptocurrenc
 
 # Project Overview
 
-The repository is currently in a pre-implementation documentation-only state. It contains committed Markdown documentation and `.gitignore`; it does not yet contain Rails application source, Docker configuration, CI configuration, application configuration, dependency manifests, or background-processing infrastructure.
+The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, safe environment placeholders, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, background-processing infrastructure, Docker configuration, or CI configuration.
 
 The target Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
 
@@ -297,27 +297,27 @@ sequenceDiagram
 | Category               | Technology                                       | Purpose                                                                                |
 | ---------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | Language               | Ruby                                             | Primary application language.                                                          |
-| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, ActiveJob, configuration, and conventions.                |
+| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, routing, configuration, and conventions.                  |
 | Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                            |
-| Background Processing  | ActiveJob with a configured adapter              | Target abstraction for price-refresh execution; concrete adapter decision is deferred. |
+| Background Processing  | Deferred                                         | No Sidekiq, Solid Queue, Redis, scheduler, worker, or queue adapter is configured.     |
 | Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.                 |
-| HTTP Client            | Faraday                                          | External communication with CoinGecko.                                                 |
+| HTTP Client            | Deferred                                         | CoinGecko provider integration belongs to a later issue.                               |
 | Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                           |
 | Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                           |
-| Test Data              | FactoryBot                                       | Consistent test object creation.                                                       |
+| Test Data              | Deferred                                         | FactoryBot and Faker are not added until domain tests require them.                    |
 | Coverage               | SimpleCov                                        | Test coverage reporting and threshold enforcement.                                     |
 | Linting                | RuboCop                                          | Ruby style and static analysis.                                                        |
 | Security Scanning      | Brakeman                                         | Rails-focused static security analysis.                                                |
 | Containers             | Docker and Docker Compose                        | Reproducible local development environment.                                            |
 | Continuous Integration | GitHub Actions                                   | Automated test, lint, and security verification.                                       |
 
-Exact dependency versions will be recorded in `Gemfile.lock` after the Rails application foundation is generated.
+Exact dependency versions are recorded in `Gemfile.lock`.
 
 ---
 
 # Repository Structure
 
-The target repository structure below shows the intended implementation shape. The current committed repository is documentation-only and does not yet contain the Rails, Docker, CI, dependency, or application-configuration files shown in this target tree.
+The repository now contains the Rails foundation structure. The target tree below still includes future directories and files that remain deferred until their owning issues are implemented.
 
 ```text
 crypto-price-api/
@@ -370,9 +370,8 @@ crypto-price-api/
 ├── .github/
 │   └── workflows/
 │
-├── Dockerfile
-├── docker-compose.yml
 ├── Gemfile
+├── Gemfile.lock
 ├── README.md
 └── .rubocop.yml
 ```
@@ -383,26 +382,24 @@ The final structure may include small Rails-conventional additions as implementa
 
 # Quick Start
 
-> The commands in this section become executable once Phase 1 — Repository Foundation is complete. Until then, this README defines the intended setup contract.
+> The host-based Rails foundation commands in this section are executable after Issue #2. Docker, background processing, provider integration, and the public price endpoint remain deferred.
 
 ## Prerequisites
 
-After Phase 1 creates the application foundation, install the following tools before running the project locally:
+Install the following tools before running the current Rails foundation locally:
 
 - Git
-- Docker Desktop or Docker Engine with Docker Compose
 - Ruby version defined in `.ruby-version`
 - Bundler
-- PostgreSQL, if running the application without Docker
+- PostgreSQL
 
 Recommended verification commands:
 
 ```bash
 git --version
-docker --version
-docker compose version
 ruby --version
 bundle --version
+psql --version
 ```
 
 ---
@@ -420,45 +417,27 @@ Replace the repository URL if the final GitHub repository uses a different organ
 
 ## Configure Environment Variables
 
-After `.env.example` is created in the application foundation phase, create a local environment file from the supplied example:
+Create a local environment file from the supplied placeholder example:
 
 ```bash
 cp .env.example .env
 ```
 
-Set the required CoinGecko API credential in `.env`.
-
-```dotenv
-COINGECKO_API_KEY=replace_with_your_key
-```
+Keep placeholder values out of committed files. CoinGecko integration is deferred, so `COINGECKO_API_KEY` is a placeholder until the provider-client issue implements it.
 
 Never commit `.env`, credentials, API keys, tokens, or production secrets.
 
 ---
 
-## Start with Docker
+## Docker
 
-Once Docker support is implemented, start the local environment with:
-
-```bash
-docker compose up --build
-```
-
-The expected Docker workflow will:
-
-1. Build the Rails application image.
-2. Start PostgreSQL.
-3. Prepare the database.
-4. Start the Rails API.
-5. Start any required background processing or scheduler service.
-
-Detailed Docker instructions will be maintained in [`docs/JUNIOR_DEVELOPER_GUIDE.md`](docs/JUNIOR_DEVELOPER_GUIDE.md).
+Docker support is not part of the Issue #2 foundation and no `Dockerfile` or `docker-compose.yml` exists yet. Add Docker instructions only when the Docker issue implements those files.
 
 ---
 
 ## Start without Docker
 
-Once the Rails application foundation is implemented:
+Run the current host-based Rails API foundation with:
 
 ```bash
 bundle install
@@ -466,7 +445,7 @@ bin/rails db:prepare
 bin/rails server
 ```
 
-The exact development commands will be verified and documented after the application scaffold, database configuration, and background-job adapter are selected.
+The application exposes the Rails health check at `/up`. The `/prices/:symbol` endpoint is not implemented in Issue #2.
 
 ---
 
@@ -499,14 +478,21 @@ The exact coverage-report path may differ by operating system.
 
 | Variable                 |              Required | Description                                                                            |
 | ------------------------ | --------------------: | -------------------------------------------------------------------------------------- |
-| `COINGECKO_API_KEY`      |                   Yes | CoinGecko API key used by the external provider client.                                |
-| `DATABASE_URL`           | Environment-dependent | PostgreSQL connection string when a standard Rails database configuration is not used. |
+| `COINGECKO_API_KEY`      | Placeholder until provider integration | CoinGecko API key for the future external provider client.                            |
+| `DATABASE_NAME`          |                    No | Development database name. Defaults to `crypto_price_api_development`.                |
+| `TEST_DATABASE_NAME`     |                    No | Test database name. Defaults to `crypto_price_api_test`.                              |
+| `DATABASE_HOST`          |                    No | PostgreSQL host when local socket defaults are not used.                              |
+| `DATABASE_PORT`          |                    No | PostgreSQL port when local defaults are not used.                                     |
+| `DATABASE_USERNAME`      |                    No | PostgreSQL username when local defaults are not used.                                 |
+| `DATABASE_PASSWORD`      |                    No | PostgreSQL password when local defaults are not used.                                 |
+| `DATABASE_URL`           | Environment-dependent | Full PostgreSQL connection string override when discrete variables are not used.      |
+| `TEST_DATABASE_URL`      | Environment-dependent | Full test PostgreSQL connection string override when discrete variables are not used. |
 | `RAILS_ENV`              |                    No | Rails environment. Defaults to `development` for local execution.                      |
 | `RAILS_LOG_LEVEL`        |                    No | Application log level.                                                                 |
-| `PRICE_REFRESH_SYMBOLS`  |                    No | Comma-separated cryptocurrency symbols configured for scheduled refresh.               |
-| `PRICE_REFRESH_CURRENCY` |                    No | Quote currency used during refresh. Defaults to `usd`.                                 |
+| `PRICE_REFRESH_SYMBOLS`  | Deferred              | Future scheduled-refresh configuration; not used by the Issue #2 foundation.          |
+| `PRICE_REFRESH_CURRENCY` | Deferred              | Future quote-currency configuration; not used by the Issue #2 foundation.              |
 
-The final configuration schema and environment-specific behaviour will be documented in [`docs/BACKGROUND_JOBS.md`](docs/BACKGROUND_JOBS.md) and [`docs/JUNIOR_DEVELOPER_GUIDE.md`](docs/JUNIOR_DEVELOPER_GUIDE.md).
+The current foundation configuration is represented by `.env.example`, `config/database.yml`, and the Rails environment files. Background-job configuration remains deferred.
 
 ---
 
@@ -605,10 +591,9 @@ The repository is not considered production-ready until all of the following pas
 bundle exec rspec
 bundle exec rubocop
 bundle exec brakeman
-docker compose build
 ```
 
-GitHub Actions will run the defined quality gates automatically once continuous integration is configured.
+GitHub Actions will run the defined quality gates automatically once continuous integration is configured in a later issue.
 
 ---
 
@@ -753,12 +738,10 @@ Before contributing:
 5. Update affected documentation.
 6. Run the quality gates before committing.
 
-A detailed contribution guide may be added before the Version 1.0 release.
+Detailed contribution rules are maintained in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
 # License
 
-A license will be selected and added during the Repository Foundation phase.
-
-Until then, all rights are reserved by the project owner.
+A license has not yet been selected. Until then, all rights are reserved by the project owner.

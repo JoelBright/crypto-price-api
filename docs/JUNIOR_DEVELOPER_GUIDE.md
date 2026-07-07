@@ -466,12 +466,15 @@ Create `.env.example`:
 
 ```dotenv
 RAILS_ENV=development
-DATABASE_URL=postgresql://postgres:postgres@db:5432/crypto_price_api_development
+RAILS_MAX_THREADS=5
+RAILS_LOG_LEVEL=debug
+DATABASE_NAME=crypto_price_api_development
+TEST_DATABASE_NAME=crypto_price_api_test
+# DATABASE_HOST=localhost
+# DATABASE_PORT=5432
+# DATABASE_USERNAME=replace_with_local_postgresql_user
+# DATABASE_PASSWORD=replace_with_local_postgresql_password
 COINGECKO_API_KEY=replace_with_your_coingecko_api_key
-PRICE_REFRESH_SYMBOLS=btc,eth
-PRICE_REFRESH_CURRENCY=usd
-PRICE_REFRESH_INTERVAL_SECONDS=60
-PRICE_REFRESH_MAX_RETRIES=3
 ```
 
 Create your local secret file:
@@ -695,17 +698,24 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-  url: <%= ENV["DATABASE_URL"] %>
+  host: <%= ENV["DATABASE_HOST"] %>
+  port: <%= ENV["DATABASE_PORT"] %>
+  username: <%= ENV["DATABASE_USERNAME"] %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
 
 development:
   <<: *default
+  database: <%= ENV.fetch("DATABASE_NAME", "crypto_price_api_development") %>
+  url: <%= ENV["DATABASE_URL"] %>
 
 test:
   <<: *default
-  url: <%= ENV.fetch("TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/crypto_price_api_test") %>
+  database: <%= ENV.fetch("TEST_DATABASE_NAME", "crypto_price_api_test") %>
+  url: <%= ENV["TEST_DATABASE_URL"] %>
 
 production:
   <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
 ```
 
 ## Why Environment-Driven Configuration?

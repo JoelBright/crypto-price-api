@@ -1,0 +1,36 @@
+plugins:
+  - rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - vendor/bundle/**/*
+    - tmp/**/*
+    - db/schema.rb
+    - bin/bundle
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false
+
+Style/ArgumentsForwarding:
+  Enabled: false
+
+Style/GlobalStdStream:
+  Enabled: false
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false

@@ -224,6 +224,10 @@ A conventional full-stack Rails application would include components that do not
 
 Use a Rails application generated in API-only mode.
 
+## Issue #2 Implementation Note
+
+The foundation uses Rails 8.1.3 with Ruby 3.4.4, PostgreSQL, and API-only configuration. The generated application intentionally excludes Action Cable, Active Job, Action Mailer, Action Mailbox, Action Text, Active Storage, Solid Queue, Redis, schedulers, worker processes, Docker, and CI setup until their owning issues select and implement them.
+
 ## Alternatives Considered
 
 | Alternative                           | Benefits                                                           | Drawbacks                                                                                  | Decision |
@@ -1433,10 +1437,14 @@ A complete quality workflow needs:
 Use:
 
 - RSpec for automated testing.
-- FactoryBot for test data.
+- FactoryBot for test data when domain tests require factories.
 - SimpleCov for coverage reporting.
 - RuboCop with Rails support for linting.
 - Brakeman for Rails security scanning.
+
+## Issue #2 Implementation Note
+
+The Rails foundation configures RSpec, SimpleCov, RuboCop, RuboCop Rails, and Brakeman. FactoryBot and Faker are intentionally deferred because Issue #2 creates no domain models or factories. CI integration remains deferred to the CI issue.
 
 ## Alternatives Considered
 
