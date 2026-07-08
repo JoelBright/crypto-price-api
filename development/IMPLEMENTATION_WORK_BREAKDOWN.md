@@ -277,11 +277,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                                                  | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ----------------------------------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| DOM-001 | Design CryptoPrice domain entity                      | Critical | FND-040    | FR-005               | Design reviewed             | ☐      |
-| DOM-002 | Identify required entity attributes                   | Critical | DOM-001    | FR-005               | Specification updated       | ☐      |
-| DOM-003 | Identify optional attributes                          | Medium   | DOM-002    | FR-005               | Design reviewed             | ☐      |
-| DOM-004 | Define entity responsibilities                        | Critical | DOM-001    | NFR-002              | Responsibilities documented | ☐      |
-| DOM-005 | Review entity against Single Responsibility Principle | High     | DOM-004    | NFR-002              | Engineering review complete | ☐      |
+| DOM-001 | Design CryptoPrice domain entity                      | Critical | FND-040    | FR-005               | Design reviewed             | ☑      |
+| DOM-002 | Identify required entity attributes                   | Critical | DOM-001    | FR-005               | Specification updated       | ☑      |
+| DOM-003 | Identify optional attributes                          | Medium   | DOM-002    | FR-005               | Design reviewed             | ☑      |
+| DOM-004 | Define entity responsibilities                        | Critical | DOM-001    | NFR-002              | Responsibilities documented | ☑      |
+| DOM-005 | Review entity against Single Responsibility Principle | High     | DOM-004    | NFR-002              | Engineering review complete | ☑      |
 
 ---
 
@@ -289,11 +289,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                                    | Priority | Depends On | Related Requirements | Verification          | Status |
 | ------- | --------------------------------------- | -------- | ---------- | -------------------- | --------------------- | ------ |
-| DOM-006 | Design database schema                  | Critical | DOM-002    | FR-005               | Schema reviewed       | ☐      |
-| DOM-007 | Define primary key strategy             | High     | DOM-006    | NFR-001              | Migration reviewed    | ☐      |
-| DOM-008 | Define timestamp strategy               | Medium   | DOM-006    | FR-005               | Schema verified       | ☐      |
-| DOM-009 | Identify required indexes               | High     | DOM-006    | NFR-001              | Index review complete | ☐      |
-| DOM-010 | Identify future schema extension points | Low      | DOM-006    | NFR-005              | Design documented     | ☐      |
+| DOM-006 | Design database schema                  | Critical | DOM-002    | FR-005               | Schema reviewed       | ☑      |
+| DOM-007 | Define primary key strategy             | High     | DOM-006    | NFR-001              | Migration reviewed    | ☑      |
+| DOM-008 | Define timestamp strategy               | Medium   | DOM-006    | FR-005               | Schema verified       | ☑      |
+| DOM-009 | Identify required indexes               | High     | DOM-006    | NFR-001              | Index review complete | ☑      |
+| DOM-010 | Identify future schema extension points | Low      | DOM-006    | NFR-005              | Design documented     | ☑      |
 
 ---
 
@@ -301,11 +301,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                                    | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | --------------------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| DOM-011 | Generate CryptoPrice model              | Critical | DOM-006    | FR-005               | Model loads successfully     | ☐      |
-| DOM-012 | Implement validations                   | Critical | DOM-011    | FR-005               | Validation specs pass        | ☐      |
-| DOM-013 | Configure attribute constraints         | High     | DOM-012    | FR-005               | Database validation verified | ☐      |
-| DOM-014 | Review model responsibilities           | High     | DOM-013    | NFR-002              | Engineering review complete  | ☐      |
-| DOM-015 | Verify model contains no business logic | Critical | DOM-014    | NFR-002              | Code review completed        | ☐      |
+| DOM-011 | Generate CryptoPrice model              | Critical | DOM-006    | FR-005               | Model loads successfully     | ☑      |
+| DOM-012 | Implement validations                   | Critical | DOM-011    | FR-005               | Validation specs pass        | ☑      |
+| DOM-013 | Configure attribute constraints         | High     | DOM-012    | FR-005               | Database validation verified | ☑      |
+| DOM-014 | Review model responsibilities           | High     | DOM-013    | NFR-002              | Engineering review complete  | ☑      |
+| DOM-015 | Verify model contains no business logic | Critical | DOM-014    | NFR-002              | Code review completed        | ☑      |
 
 ---
 
@@ -313,11 +313,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                     | Priority | Depends On | Related Requirements | Verification        | Status |
 | ------- | ------------------------ | -------- | ---------- | -------------------- | ------------------- | ------ |
-| DOM-016 | Create migration         | Critical | DOM-006    | FR-005               | Migration generated | ☐      |
-| DOM-017 | Add database constraints | High     | DOM-016    | FR-005               | Schema verified     | ☐      |
-| DOM-018 | Add indexes              | High     | DOM-017    | NFR-001              | Indexes verified    | ☐      |
-| DOM-019 | Execute migration        | Critical | DOM-018    | FR-005               | Migration succeeds  | ☐      |
-| DOM-020 | Verify rollback          | High     | DOM-019    | NFR-001              | Rollback succeeds   | ☐      |
+| DOM-016 | Create migration         | Critical | DOM-006    | FR-005               | Migration generated | ☑      |
+| DOM-017 | Add database constraints | High     | DOM-016    | FR-005               | Schema verified     | ☑      |
+| DOM-018 | Add indexes              | High     | DOM-017    | NFR-001              | Indexes verified    | ☑      |
+| DOM-019 | Execute migration        | Critical | DOM-018    | FR-005               | Migration succeeds  | ☑      |
+| DOM-020 | Verify rollback          | High     | DOM-019    | NFR-001              | Rollback succeeds   | ☑      |
 
 ---
 
@@ -351,9 +351,9 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                            | Priority | Depends On | Related Requirements | Verification       | Status |
 | ------- | ------------------------------- | -------- | ---------- | -------------------- | ------------------ | ------ |
-| DOM-033 | Create CryptoPrice factory      | High     | DOM-011    | NFR-011              | Factory loads      | ☐      |
-| DOM-034 | Define realistic default values | Medium   | DOM-033    | NFR-011              | Factory verified   | ☐      |
-| DOM-035 | Verify factory linting          | Medium   | DOM-034    | NFR-011              | Factory specs pass | ☐      |
+| DOM-033 | Create CryptoPrice factory      | High     | DOM-011    | NFR-011              | Factory loads      | ☑      |
+| DOM-034 | Define realistic default values | Medium   | DOM-033    | NFR-011              | Factory verified   | ☑      |
+| DOM-035 | Verify factory linting          | Medium   | DOM-034    | NFR-011              | Factory specs pass | ☑      |
 
 ---
 
@@ -371,8 +371,8 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                            | Priority | Depends On | Related Requirements | Verification         | Status |
 | ------- | ------------------------------- | -------- | ---------- | -------------------- | -------------------- | ------ |
-| DOM-039 | Write model specifications      | Critical | DOM-015    | NFR-011              | Specs pass           | ☐      |
-| DOM-040 | Write validation specifications | Critical | DOM-039    | NFR-011              | Specs pass           | ☐      |
+| DOM-039 | Write model specifications      | Critical | DOM-015    | NFR-011              | Specs pass           | ☑      |
+| DOM-040 | Write validation specifications | Critical | DOM-039    | NFR-011              | Specs pass           | ☑      |
 | DOM-041 | Write repository specifications | Critical | DOM-026    | NFR-011              | Specs pass           | ☐      |
 | DOM-042 | Write cache specifications      | Critical | DOM-032    | NFR-011              | Specs pass           | ☐      |
 | DOM-043 | Verify migration behaviour      | Medium   | DOM-020    | NFR-011              | Migration tests pass | ☐      |
@@ -384,7 +384,7 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                          | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ----------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| DOM-045 | Update DATABASE.md            | High     | DOM-020    | NFR-015              | Documentation reviewed      | ☐      |
+| DOM-045 | Update DATABASE.md            | High     | DOM-020    | NFR-015              | Documentation reviewed      | ☑      |
 | DOM-046 | Update ARCHITECTURE.md        | High     | DOM-032    | NFR-015              | Documentation reviewed      | ☐      |
 | DOM-047 | Record engineering decisions  | High     | DOM-046    | NFR-015              | Engineering Journal updated | ☐      |
 | DOM-048 | Update Junior Developer Guide | Medium   | DOM-047    | NFR-015              | Documentation reviewed      | ☐      |

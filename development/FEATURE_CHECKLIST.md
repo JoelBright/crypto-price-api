@@ -138,11 +138,11 @@ Only major implementation milestones shall be tracked here.
 
 ## Domain Layer
 
-- ☐ CryptoPrice Model
-- ☐ Database Schema
+- ☑ CryptoPrice Model
+- ☑ Database Schema
 - ☐ Repository Layer
 - ☐ Cache Layer
-- ☐ Model Validations
+- ☑ Model Validations
 
 ---
 
@@ -190,7 +190,7 @@ Only major implementation milestones shall be tracked here.
 
 ## Testing
 
-- ☐ Model Specs
+- ☑ Model Specs
 - ☐ Repository Specs
 - ☐ Cache Specs
 - ☐ Provider Specs
