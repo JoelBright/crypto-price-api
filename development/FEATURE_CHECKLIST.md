@@ -75,7 +75,7 @@ Only major implementation milestones shall be tracked here.
 | External Provider Integration | ☐      |
 | Business Services             | ☐      |
 | Background Processing         | ☐      |
-| REST API                      | ☐      |
+| REST API                      | ☑      |
 | Testing & Quality Assurance   | ☐      |
 | Production Hardening          | ☐      |
 | Release Certification         | ☐      |
@@ -88,10 +88,10 @@ Only major implementation milestones shall be tracked here.
 | --------------------------- | -------- | ------- |
 | Functional Requirements     | 100%     | 0%      |
 | Non-Functional Requirements | 100%     | 0%      |
-| Test Coverage               | ≥95%     | —       |
+| Test Coverage               | ≥95%     | 99.31%  |
 | CI Status                   | Passing  | —       |
-| RuboCop                     | Passing  | —       |
-| Brakeman                    | Passing  | —       |
+| RuboCop                     | Passing  | Passing |
+| Brakeman                    | Passing  | Passing |
 | Documentation               | Complete | —       |
 
 ---
@@ -105,7 +105,7 @@ Only major implementation milestones shall be tracked here.
 | Phase 3 – External Provider Integration |    ☑    |      ☑      |    ☐     |
 | Phase 4 – Business Services             |    ☑    |      ☑      |    ☐     |
 | Phase 5 – Background Processing         |    ☑    |      ☐      |    ☑     |
-| Phase 6 – REST API                      |    ☑    |      ☐      |    ☐     |
+| Phase 6 – REST API                      |    ☑    |      ☐      |    ☑     |
 | Phase 7 – Testing & QA                  |    ☑    |      ☐      |    ☐     |
 | Phase 8 – Production Hardening          |    ☑    |      ☐      |    ☐     |
 | Phase 9 – Release Certification         |    ☑    |      ☐      |    ☐     |
@@ -179,12 +179,12 @@ Only major implementation milestones shall be tracked here.
 
 ## REST API
 
-- ☐ Routes
-- ☐ PricesController
-- ☐ Request Validation
-- ☐ Response Serialization
-- ☐ Error Serialization
-- ☐ API Contract
+- ☑ Routes
+- ☑ PricesController
+- ☑ Request Validation
+- ☑ Response Serialization
+- ☑ Error Serialization
+- ☑ API Contract
 
 ---
 
@@ -196,7 +196,7 @@ Only major implementation milestones shall be tracked here.
 - ☑ Provider Specs
 - ☑ Service Specs
 - ☑ Job Specs
-- ☐ Request Specs
+- ☑ Request Specs
 - ☐ Integration Specs
 - ☐ Fallback Specs
 
@@ -286,7 +286,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 | Category         | Target              | Current |
 | ---------------- | ------------------- | ------- |
 | Unit Tests       | 100% Critical Logic | —       |
-| Request Specs    | 100% Endpoints      | —       |
+| Request Specs    | 100% Endpoints      | Complete |
 | Service Specs    | 100% Services       | —       |
 | Background Jobs  | 100% Jobs           | —       |
 | Overall Coverage | ≥95%                | 98.1%   |
@@ -318,7 +318,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 
 ```text
 Phase:
-Phase 5 — Background Processing
+Phase 6 — REST API
 ```
 
 ---
@@ -327,7 +327,7 @@ Phase 5 — Background Processing
 
 ```text
 Work Package:
-GitHub Issue #10 — Scheduled price refresh with Solid Queue recurring scheduling
+GitHub Issue #11 — Expose GET /prices/:symbol with stable success and error responses
 ```
 
 ---
@@ -336,7 +336,7 @@ GitHub Issue #10 — Scheduled price refresh with Solid Queue recurring scheduli
 
 ```text
 Task ID:
-JOB-001 through JOB-034
+API-001 through API-043
 ```
 
 ---
@@ -344,7 +344,7 @@ JOB-001 through JOB-034
 ## Objective
 
 ```text
-Implement scheduled price refresh using the accepted Solid Queue background infrastructure with built-in recurring scheduling. Add Active Job railtie, Solid Queue configuration, PriceRefreshJob, recurring schedule, Docker jobs service, bounded retry behaviour, and comprehensive job/scheduler specs.
+Expose GET /prices/:symbol with thin controller orchestration, request validation, response serialization, error serialization, HTTP status mapping, and request specs.
 ```
 
 ---
@@ -352,7 +352,7 @@ Implement scheduled price refresh using the accepted Solid Queue background infr
 ## Blockers
 
 ```text
-Pre-existing Docker credential helper incompatibility prevents docker compose build from succeeding in WSL. docker compose config passes. The Dockerfile and compose configuration are correct.
+None for Phase 2 implementation. Validation used Docker PostgreSQL through localhost:5433 via TEST_DATABASE_URL.
 ```
 
 ---
@@ -361,7 +361,7 @@ Pre-existing Docker credential helper incompatibility prevents docker compose bu
 
 ```text
 Task ID:
-Phase 6 — REST API / GitHub Issue #11
+Phase 7 — Testing & Quality Assurance
 ```
 
 ---
@@ -370,10 +370,10 @@ Phase 6 — REST API / GitHub Issue #11
 
 ```text
 Completed:
-Active Job railtie enabled, Solid Queue 1.4.0 installed, config/queue.yml, config/recurring.yml, db/queue_schema.rb, bin/jobs generated and configured. ApplicationJob and PriceRefreshJob created with retry_on/discard_on policy. Queue adapters configured per environment. Docker jobs service added. 24 job specs and 13 recurring config specs passing. 118 total examples, 0 failures, 98.25% line coverage. RuboCop: 0 offenses. Brakeman: 0 warnings. Documentation updated.
+REST API route, PricesController, success/error serializers, and request specs implemented. Required focused and full validation passed: 128 examples, 0 failures, 99.31% line coverage. RuboCop: 0 offenses. Brakeman: 0 warnings. Documentation updated.
 
 Pending:
-Review and merge. Phase 6 depends on this issue.
+Review Phase 2 implementation. Do not commit or open PR until Phase 3 / delivery approval.
 ```
 
 ---

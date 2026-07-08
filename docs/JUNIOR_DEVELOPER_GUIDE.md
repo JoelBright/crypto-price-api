@@ -1659,3 +1659,91 @@ Solid Queue was selected over Sidekiq (see ADR-017 in `ENGINEERING_JOURNAL.md`) 
 - Waiting for a real minute in tests.
 - Adding Redis or Sidekiq dependencies.
 - Forgetting to enable the Active Job railtie.
+---
+
+# 19. Implement the HTTP API
+
+## Goal
+
+Expose the public `GET /prices/:symbol` endpoint without moving business logic into the controller.
+
+---
+
+## Files
+
+Create:
+
+```text
+app/controllers/prices_controller.rb
+app/serializers/price_response_serializer.rb
+app/serializers/error_response_serializer.rb
+spec/requests/prices_spec.rb
+```
+
+Update:
+
+```text
+config/routes.rb
+```
+
+---
+
+## Controller Boundary
+
+`PricesController` owns HTTP transport work only:
+
+- normalize the incoming path symbol for service input;
+- validate the symbol format;
+- reject syntactically valid but unsupported symbols;
+- delegate lookup to `PriceQueryService`;
+- map service outcomes to documented HTTP statuses;
+- render success and error serializers;
+- return a safe `internal_error` envelope for unexpected failures.
+
+The controller must not query ActiveRecord, call `CoinGeckoClient`, access `Rails.cache`, or know background-job concepts.
+
+---
+
+## Serialization
+
+`PriceResponseSerializer` converts internal uppercase values to the public lowercase JSON contract:
+
+```json
+{
+  "symbol": "btc",
+  "price": 109283.12,
+  "currency": "usd",
+  "last_updated_at": "2026-07-08T12:34:56Z"
+}
+```
+
+`ErrorResponseSerializer` produces stable error envelopes:
+
+```json
+{
+  "error": {
+    "code": "price_not_found",
+    "message": "No stored price is available for symbol 'btc'."
+  }
+}
+```
+
+---
+
+## Verification
+
+Run request-level verification first, then the relevant regression set:
+
+```bash
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/crypto_price_api_test RAILS_ENV=test bundle exec rspec spec/requests/prices_spec.rb
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/crypto_price_api_test RAILS_ENV=test bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
+
+Expected result:
+
+- request specs pass;
+- full suite passes;
+- RuboCop reports no offenses;
+- Brakeman reports no warnings.

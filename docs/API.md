@@ -58,6 +58,13 @@ The endpoint serves a cached or persisted value.
 
 It does not make a synchronous request to CoinGecko while processing the client request.
 
+Current implementation status:
+
+- `GET /prices/:symbol` is implemented by `PricesController#show`.
+- Successful responses are serialized by `PriceResponseSerializer`.
+- Error responses are serialized by `ErrorResponseSerializer`.
+- The controller delegates price lookup to `PriceQueryService` and does not call CoinGecko, ActiveRecord, or Rails cache directly.
+
 ---
 
 # 2. Base URL and Versioning
