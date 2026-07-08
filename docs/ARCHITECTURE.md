@@ -214,13 +214,28 @@ The controller must not:
 
 The query service owns the API read-path orchestration.
 
+Implementation location:
+
+```text
+app/services/price_query_service.rb
+```
+
 Responsibilities:
 
 - Retrieve a price from cache first.
 - Retrieve the latest stored value when the cache does not contain a usable entry.
 - Repopulate cache from persisted data after a cache miss.
-- Return a stable application-level response model.
+- Return a stable application-level response result (`PriceQueryService::Result`) with `found?` and `not_found?` predicates.
 - Raise a predictable application-level error when no stored price exists.
+- Fall back to repository when cache read fails.
+- Log cache read and cache write failures without affecting the returned result.
+
+Dependencies:
+
+| Dependency                | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `CryptoPriceRepository`   | Persistence lookup by symbol, currency, and provider. |
+| `PriceCache`              | Cache reads, writes, and key construction.    |
 
 The query service must not:
 
@@ -228,12 +243,29 @@ The query service must not:
 - Render JSON.
 - Know HTTP status codes.
 - Perform raw ActiveRecord queries.
+- Refresh data.
+- Perform retries.
+- Know scheduler or background-job concepts.
 
 ---
 
 ## 5.4 `PriceRefreshService`
 
 The refresh service owns the background price-refresh workflow.
+
+Implementation location:
+
+```text
+app/services/price_refresh_service.rb
+```
+
+Public interface:
+
+```ruby
+refresh(symbol:, currency: "USD")
+```
+
+Returns a `PriceRefreshService::Result` with `success?` and `failure?` predicates, the persisted `CryptoPrice` record on success, and a controlled error object on failure.
 
 Responsibilities:
 
@@ -242,7 +274,17 @@ Responsibilities:
 - Persist a valid latest price.
 - Update the cache after persistence succeeds.
 - Preserve prior valid data when the provider fails.
+- Never update cache before persistence succeeds.
+- Log cache write failures but return the successful persistence result.
 - Emit structured logs for success and failure paths.
+
+Dependencies:
+
+| Dependency                | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `CoinGeckoClient`         | Provider price fetch and response validation. |
+| `CryptoPriceRepository`   | Persistence create/update by composite key.   |
+| `PriceCache`              | Cache updates after successful persistence.   |
 
 The refresh service must not:
 
@@ -250,6 +292,8 @@ The refresh service must not:
 - Know route definitions.
 - Include scheduler configuration.
 - Contain provider-specific HTTP details.
+- Know controller or HTTP response concepts.
+- Know scheduler, worker, or background-job concepts.
 
 ---
 
@@ -438,7 +482,7 @@ flowchart RL
 | Component       | Allowed Dependencies                                        |
 | --------------- | ----------------------------------------------------------- |
 | Controller      | Services, serializers, error mapping.                       |
-| Query Service   | Cache abstraction, repository, response model.              |
+| Query Service   | Cache abstraction, repository, response result.              |
 | Refresh Service | Provider client, repository, cache, logging.                |
 | Repository      | Model and persistence framework.                            |
 | Provider Client | HTTP library, provider configuration, provider error types. |

@@ -103,7 +103,7 @@ Only major implementation milestones shall be tracked here.
 | Phase 1 – Repository Foundation         |    ☑    |      ☐      |    ☑     |
 | Phase 2 – Domain Design                 |    ☑    |      ☐      |    ☑     |
 | Phase 3 – External Provider Integration |    ☑    |      ☑      |    ☐     |
-| Phase 4 – Business Services             |    ☑    |      ☐      |    ☐     |
+| Phase 4 – Business Services             |    ☑    |      ☑      |    ☐     |
 | Phase 5 – Background Processing         |    ☑    |      ☐      |    ☐     |
 | Phase 6 – REST API                      |    ☑    |      ☐      |    ☐     |
 | Phase 7 – Testing & QA                  |    ☑    |      ☐      |    ☐     |
@@ -159,11 +159,11 @@ Only major implementation milestones shall be tracked here.
 
 ## Business Layer
 
-- ☐ PriceQueryService
-- ☐ PriceRefreshService
-- ☐ Cache Coordination
-- ☐ Persistence Coordination
-- ☐ Fallback Logic
+- ☑ PriceQueryService
+- ☑ PriceRefreshService
+- ☑ Cache Coordination
+- ☑ Persistence Coordination
+- ☑ Fallback Logic
 
 ---
 
@@ -194,7 +194,7 @@ Only major implementation milestones shall be tracked here.
 - ☑ Repository Specs
 - ☑ Cache Specs
 - ☑ Provider Specs
-- ☐ Service Specs
+- ☑ Service Specs
 - ☐ Job Specs
 - ☐ Request Specs
 - ☐ Integration Specs
@@ -289,7 +289,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 | Request Specs    | 100% Endpoints      | —       |
 | Service Specs    | 100% Services       | —       |
 | Background Jobs  | 100% Jobs           | —       |
-| Overall Coverage | ≥95%                | —       |
+| Overall Coverage | ≥95%                | 98.1%   |
 
 ---
 
