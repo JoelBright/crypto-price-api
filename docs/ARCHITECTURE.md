@@ -280,6 +280,12 @@ The client must not:
 
 The cache abstraction encapsulates all cache interaction.
 
+Implementation location:
+
+```text
+app/cache/price_cache.rb
+```
+
 Responsibilities:
 
 - Build stable cache keys.
@@ -287,6 +293,7 @@ Responsibilities:
 - Write cache entries.
 - Apply configured expiry behaviour.
 - Invalidate entries when necessary.
+- Use only Rails cache-compatible `read`, `write`, and `delete` APIs through an injected cache store.
 
 The cache abstraction must not:
 
@@ -301,9 +308,15 @@ The cache abstraction must not:
 
 The repository encapsulates persistence operations.
 
+Implementation location:
+
+```text
+app/repositories/crypto_price_repository.rb
+```
+
 Responsibilities:
 
-- Find the latest stored value for a symbol.
+- Find the latest stored value for a normalized symbol, currency, and provider.
 - Create or update a current price record.
 - Isolate ActiveRecord query syntax from services.
 - Return persistence data through a stable interface.
@@ -555,6 +568,31 @@ The system follows a write-after-persist pattern:
 3. Update the cache from the persisted record.
 
 This prevents the cache from representing a value that was not successfully committed to durable storage.
+
+## Implemented Cache Boundary
+
+`PriceCache` is the only cache boundary introduced in the domain phase. It accepts an injected Rails cache-compatible store and defaults to `Rails.cache`.
+
+The cache boundary currently:
+
+- Generates normalized keys in the form `prices:<provider>:<symbol>:<currency>`.
+- Reads cached payloads through `cache_store.read`.
+- Writes simple price payload hashes through `cache_store.write`.
+- Deletes cached payloads through `cache_store.delete`.
+- Avoids Redis-specific APIs and cache-store-specific behaviour.
+
+Rails Memory Store remains the Version 1.0 cache-store decision. Redis cache integration is intentionally deferred until a later architecture decision requires it.
+
+## Implemented Repository Boundary
+
+`CryptoPriceRepository` is the persistence boundary for current price records. It normalizes symbol, currency, and provider inputs before querying or writing and only identifies records by the composite `[symbol, currency, provider]` key.
+
+The repository currently exposes:
+
+- `find(symbol:, currency:, provider:)`
+- `upsert(symbol:, price:, currency:, provider:, fetched_at:)`
+
+The repository does not call cache, providers, controllers, services, background jobs, retries, or logging.
 
 ---
 

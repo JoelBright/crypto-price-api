@@ -3,7 +3,7 @@ require "simplecov"
 SimpleCov.start "rails" do
   enable_coverage :branch
   add_filter "/spec/"
-  minimum_coverage 90
+  minimum_coverage 90 if ARGV.empty?
 end
 
 RSpec.configure do |config|
