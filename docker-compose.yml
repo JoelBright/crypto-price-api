@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:17-bookworm
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: crypto_price_api_development
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
       - "5433:5432"
     volumes:
@@ -26,8 +26,8 @@ services:
       # DATABASE_URL connects via the internal Docker network (service name 'db').
       # Host port mapping (5433:5432, 3001:3000) avoids collisions with local
       # PostgreSQL or Rails instances running on the host.
-      DATABASE_URL: postgresql://postgres:***@db:5432/crypto_price_api_development
-      TEST_DATABASE_URL: postgresql://postgres:***@db:5432/crypto_price_api_test
+      DATABASE_URL: ${DATABASE_URL}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL}
       RAILS_MAX_THREADS: 5
       RAILS_LOG_LEVEL: debug
     depends_on:
@@ -43,7 +43,8 @@ services:
     command: bundle exec bin/jobs
     environment:
       RAILS_ENV: development
-      DATABASE_URL: postgresql://postgres:***@db:5432/crypto_price_api_development
+      DATABASE_URL: ${DATABASE_URL}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL}
       RAILS_MAX_THREADS: 5
       RAILS_LOG_LEVEL: debug
     depends_on:
