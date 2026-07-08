@@ -1,8 +1,8 @@
 # Cryptocurrency Price API
 
-A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
+A production-quality Ruby on Rails API that retrieves cryptocurrency prices from CoinGecko, stores the latest known values, serves cached responses, and remains available when the external provider is temporarily unavailable.
 
-> **Project Status:** Rails API foundation, Docker, CI, repository governance, domain design, CoinGecko provider integration, application services, and background processing (Solid Queue with recurring scheduling) complete; REST API endpoint and release certification remain deferred.
+> **Project Status:** Complete — Version 1.0.0 Release Candidate
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -62,7 +62,19 @@ A planned production-oriented Ruby on Rails API that will retrieve cryptocurrenc
 
 # Project Overview
 
-The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, FactoryBot, safe environment placeholders, Docker configuration, CI configuration, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, or background-processing infrastructure.
+The repository contains the complete Rails API-only application, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec test suite, SimpleCov, RuboCop, Brakeman, FactoryBot, safe environment placeholders, Docker configuration, CI configuration, and comprehensive project documentation. The following layers are fully implemented:
+
+- Domain model (`CryptoPrice`) with database migration and composite unique index
+- Data repository layer (`CryptoPriceRepository`) with upsert behaviour
+- Cache abstraction (`PriceCache`) with cache-first read strategy
+- CoinGecko provider client (`CoinGeckoClient`) with timeout handling, retries, and error translation
+- Price query service (`PriceQueryService`) for cache-first reads with database fallback
+- Price refresh service (`PriceRefreshService`) for provider fetching, persistence, and cache coordination
+- Scheduled background job (`PriceRefreshJob`) via Solid Queue with recurring one-minute schedule
+- REST API endpoint at `GET /prices/:symbol` with request validation, serialization, and error handling
+- Complete RSpec test suite (130 examples, 0 failures)
+- Docker Compose development environment with web, database, and jobs services
+- GitHub Actions CI pipeline
 
 The target Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
 
@@ -92,7 +104,7 @@ The project must also demonstrate production-quality engineering practices, incl
 
 # Solution Overview
 
-The target API follows a cache-first, background-refresh architecture. This is an intended design shape, not an implemented application state.
+The API follows a cache-first, background-refresh architecture.
 
 ```mermaid
 flowchart LR
@@ -112,7 +124,7 @@ flowchart LR
     RefreshService --> Cache
 ```
 
-In the target design, the API request path does not depend on a live CoinGecko response.
+In the design, the API request path does not depend on a live CoinGecko response.
 
 This design ensures that a temporary upstream outage does not unnecessarily make the public API unavailable.
 
@@ -135,7 +147,7 @@ The read path follows this order:
 
 ## Background Price Refresh
 
-The target design requires a scheduled background job (Solid Queue recurring task) to retrieve prices from CoinGecko every minute. The scheduler, queue adapter, and worker process layout have been validated (see ADR-017 in ENGINEERING_JOURNAL.md).
+The design requires a scheduled background job (Solid Queue recurring task) to retrieve prices from CoinGecko every minute. The scheduler, queue adapter, and worker process layout are implemented and validated (see ADR-017 in ENGINEERING_JOURNAL.md).
 
 A successful refresh performs the following actions:
 
@@ -161,9 +173,9 @@ When CoinGecko is unavailable, slow, malformed, or otherwise fails:
 
 ## Consistent API Responses
 
-The target API returns predictable JSON responses for successful requests and failure conditions.
+The API returns predictable JSON responses for successful requests and failure conditions.
 
-Target successful response:
+Successful response:
 
 ```json
 {
@@ -174,7 +186,7 @@ Target successful response:
 }
 ```
 
-Target error response:
+Error response:
 
 ```json
 {
@@ -185,7 +197,7 @@ Target error response:
 }
 ```
 
-The final response contract, status codes, validation rules, and error schema are defined in [`docs/API.md`](docs/API.md).
+The response contract, status codes, validation rules, and error schema are defined in [`docs/API.md`](docs/API.md).
 
 ---
 
@@ -301,7 +313,7 @@ sequenceDiagram
 | Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                        |
 | Background Processing  | Solid Queue 1.4+ (Accepted)                 | Database-backed Active Job backend with built-in recurring scheduling.              |
 | Scheduling             | Solid Queue built-in recurring tasks             | One-minute refresh schedule managed by Solid Queue's recurring task scheduler.      |
-| HTTP Client            | Deferred                                         | CoinGecko provider integration belongs to a later issue.                           |
+| HTTP Client            | Faraday 2.x                                     | CoinGecko provider HTTP communication, timeouts, and retries. |
 | Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                       |
 | Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                       |
 | Test Data              | FactoryBot                                       | Repeatable model creation for domain tests.                                        |
@@ -317,7 +329,7 @@ Exact dependency versions are recorded in `Gemfile.lock`.
 
 # Repository Structure
 
-The repository now contains the Rails foundation structure. The target tree below still includes future directories and files that remain deferred until their owning issues are implemented.
+The repository structure reflects the implemented application:
 
 ```text
 crypto-price-api/
@@ -385,7 +397,7 @@ The final structure may include small Rails-conventional additions as implementa
 
 # Quick Start
 
-> The host-based Rails foundation commands in this section are executable after Issue #2. Docker, background processing, provider integration, and the public price endpoint remain deferred.
+> Docker, background processing, provider integration, and the public price endpoint are implemented. These quick-start commands are validated and ready for a fresh clone.
 
 ## Prerequisites
 
@@ -420,13 +432,13 @@ Replace the repository URL if the final GitHub repository uses a different organ
 
 ## Configure Environment Variables
 
-Create a local environment file from the supplied placeholder example:
+Create a local environment file from the supplied example:
 
 ```bash
 cp .env.example .env
 ```
 
-Keep placeholder values out of committed files. CoinGecko integration is deferred, so `COINGECKO_API_KEY` is a placeholder until the provider-client issue implements it.
+Keep placeholder values out of committed files. `COINGECKO_API_KEY` is required for provider integration.
 
 Never commit `.env`, credentials, API keys, tokens, or production secrets.
 
@@ -478,7 +490,7 @@ docker compose down -v
 
 ## Start without Docker
 
-Run the current host-based Rails API foundation with:
+Run the application without Docker:
 
 ```bash
 bundle install
@@ -486,7 +498,7 @@ bin/rails db:prepare
 bin/rails server
 ```
 
-The application exposes the Rails health check at `/up`. The `/prices/:symbol` endpoint is not implemented in Issue #2.
+The application exposes the Rails health check at `/up` and the price endpoint at `/prices/:symbol`.
 
 ---
 
@@ -519,7 +531,7 @@ The exact coverage-report path may differ by operating system.
 
 | Variable                 |                               Required | Description                                                                           |
 | ------------------------ | -------------------------------------: | ------------------------------------------------------------------------------------- |
-| `COINGECKO_API_KEY`      | Placeholder until provider integration | CoinGecko API key for the future external provider client.                            |
+| `COINGECKO_API_KEY`      |                                  Required | CoinGecko API key for the external provider client.                            |
 | `DATABASE_NAME`          |                                     No | Development database name. Defaults to `crypto_price_api_development`.                |
 | `TEST_DATABASE_NAME`     |                                     No | Test database name. Defaults to `crypto_price_api_test`.                              |
 | `DATABASE_HOST`          |                                     No | PostgreSQL host when local socket defaults are not used.                              |
@@ -530,10 +542,8 @@ The exact coverage-report path may differ by operating system.
 | `TEST_DATABASE_URL`      |                  Environment-dependent | Full test PostgreSQL connection string override when discrete variables are not used. |
 | `RAILS_ENV`              |                                     No | Rails environment. Defaults to `development` for local execution.                     |
 | `RAILS_LOG_LEVEL`        |                                     No | Application log level.                                                                |
-| `PRICE_REFRESH_SYMBOLS`  |                               Deferred | Future scheduled-refresh configuration; not used by the Issue #2 foundation.          |
-| `PRICE_REFRESH_CURRENCY` |                               Deferred | Future quote-currency configuration; not used by the Issue #2 foundation.             |
 
-The current foundation configuration is represented by `.env.example`, `config/database.yml`, and the Rails environment files. Background-job configuration remains deferred.
+Configuration is represented by `.env.example`, `config/database.yml`, and the Rails environment files.
 
 ---
 
@@ -551,7 +561,7 @@ The application follows these secret-management rules:
 
 # API Overview
 
-## Target Endpoint
+## Endpoint
 
 ```http
 GET /prices/:symbol
@@ -563,7 +573,7 @@ Example:
 GET /prices/btc
 ```
 
-Target response:
+Response:
 
 ```json
 {
@@ -574,7 +584,7 @@ Target response:
 }
 ```
 
-The endpoint is intended to return the latest cached or persisted value. It does not synchronously call CoinGecko during the request.
+The endpoint returns the latest cached or persisted value. It does not synchronously call CoinGecko during the request.
 
 For full endpoint behaviour, supported status codes, error formats, and curl examples, see [`docs/API.md`](docs/API.md).
 
@@ -606,7 +616,7 @@ flowchart TD
 
 ## Required Test Coverage
 
-The completed application will include:
+The application includes:
 
 - Model specifications
 - Repository specifications
@@ -634,7 +644,7 @@ bundle exec rubocop
 bundle exec brakeman
 ```
 
-GitHub Actions will run the defined quality gates automatically once continuous integration is configured in a later issue.
+GitHub Actions runs all quality gates automatically on every push and pull request.
 
 ---
 

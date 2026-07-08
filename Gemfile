@@ -17,9 +17,9 @@ group :development, :test do
   gem "rubocop", require: false
   gem "rubocop-rails", require: false
   gem "brakeman", require: false
+  gem "factory_bot_rails"
 end
 
 group :test do
   gem "simplecov", require: false
-  gem "factory_bot_rails"
 end

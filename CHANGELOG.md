@@ -132,47 +132,47 @@ Do not create empty category headings.
 
 # 4. Unreleased
 
-> Completed entries in this section describe documentation changes on the working branch that are not yet included in a tagged release. Planned entries describe future scope and must not be read as completed implementation.
+> Completed entries in this section describe changes on the working branch that are not yet included in a tagged release.
 
 ## Added
 
-- Initial repository documentation architecture under `docs/` and `development/`.
-- `README.md` as the project entry point and technical documentation index.
-- `PROJECT_SPECIFICATIONS.md` as the authoritative project requirements document.
-- `ARCHITECTURE.md` defining system boundaries, dependency direction, cache-first reads, background refresh flow, and graceful-degradation behaviour.
-- `DATABASE.md` defining the `CryptoPrice` persistence model, decimal storage strategy, composite uniqueness scope, indexing expectations, and migration principles.
-- `API.md` defining the `GET /prices/:symbol` contract, response format, validation rules, status codes, and error envelope.
-- `BACKGROUND_JOBS.md` defining scheduled price refresh, job boundaries, retry principles, failure handling, and operational expectations.
-- `TESTING.md` defining RSpec test boundaries, required resilience scenarios, coverage expectations, and CI quality gates.
-- `JUNIOR_DEVELOPER_GUIDE.md` defining a reconstruction workflow from an empty repository.
-- `ENGINEERING_JOURNAL.md` defining architecture decision records and initial accepted design decisions.
-- `CONTRIBUTING.md` defining contribution workflow, branch strategy, code-review standards, testing requirements, and secret-management rules.
-- `CHANGELOG.md` defining release-history and version-management conventions.
+- `GET /prices/:symbol` endpoint with normalized symbol handling, request validation, and serialization.
+- `CryptoPrice` model with decimal price storage, composite unique index, and presence validations.
+- `CryptoPriceRepository` with find and upsert operations.
+- `PriceCache` with cache-first read strategy and database fallback.
+- `CoinGeckoClient` with Faraday HTTP transport, timeout handling, bounded retries, and provider error translation.
+- `PriceQueryService` orchestrating cache-first reads, database fallback, and cache repopulation.
+- `PriceRefreshService` orchestrating provider fetch, persistence, and cache updates.
+- `PriceRefreshJob` with bounded retry and discard-on-failure policy for Solid Queue.
+- Solid Queue recurring schedule configuration for one-minute price refresh.
+- Full RSpec test suite: models, repositories, cache, client, services, jobs, requests, and integration specs.
+- Docker Compose development environment with web, database, and jobs services.
+- Docker image for Rails application runtime.
+- GitHub Actions CI pipeline with RSpec, RuboCop, and Brakeman quality gates.
 
-## Planned
+## Changed
 
-- Rails API-only application foundation.
-- PostgreSQL persistence configuration.
-- Cache and background-processing infrastructure after the relevant technology decisions are accepted.
-- CoinGecko provider client.
-- Cache-first price query service.
-- Scheduled background price-refresh job.
-- `GET /prices/:symbol` endpoint implementation.
-- RSpec test suite.
-- Docker Compose local development environment.
-- GitHub Actions continuous integration workflow.
-- Version `1.0.0` release certification.
+- `factory_bot_rails` gem moved to `:development, :test` group for Docker test compatibility.
+- Docker Compose environment variables externalized via `${VARIABLE}` interpolation.
+- `COINGECKO_API_KEY` added as an environment variable to web and jobs Docker services.
+- Documentation synchronized with verified implementation state across README, FEATURE_CHECKLIST, and RELEASE_CHECKLIST.
+
+## Security
+
+- Database credentials externalized from hardcoded values to environment variable interpolation in Docker Compose.
+- CoinGecko API key externalized via `${COINGECKO_API_KEY}` environment variable.
+- Provider API key is never logged or exposed in exception messages.
 
 ---
 
 # 5. Version 1.0.0 — Interview Release
 
-> **Status:** Planned
-> **Release Date:** To be assigned after all release gates pass.
+> **Status:** Release Candidate
+> **Release Date:** To be assigned after final release certification.
 
-## Planned Added Scope
+## Added Scope
 
-> The following items are planned for Version 1.0.0 and are not completed implementation in the current documentation-only repository.
+> The following items have been implemented and validated for Version 1.0.0.
 
 ### API
 

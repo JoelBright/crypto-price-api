@@ -70,14 +70,14 @@ Only major implementation milestones shall be tracked here.
 
 | Area                          | Status |
 | ----------------------------- | ------ |
-| Repository Foundation         | ☐      |
-| Domain Design                 | ☐      |
-| External Provider Integration | ☐      |
-| Business Services             | ☐      |
-| Background Processing         | ☐      |
+| Repository Foundation         | ☑      |
+| Domain Design                 | ☑      |
+| External Provider Integration | ☑      |
+| Business Services             | ☑      |
+| Background Processing         | ☑      |
 | REST API                      | ☑      |
-| Testing & Quality Assurance   | ◐      |
-| Production Hardening          | ☐      |
+| Testing & Quality Assurance   | ☑      |
+| Production Hardening          | ◐      |
 | Release Certification         | ☐      |
 
 ---
