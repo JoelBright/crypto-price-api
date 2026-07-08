@@ -1344,12 +1344,13 @@ The query service owns the read path — cache-first reads with database fallbac
 ## Files
 
 Create:
-
 ```text
 app/services/price_query_service.rb
 app/services/price_refresh_service.rb
+app/services/services.rb
 spec/services/price_query_service_spec.rb
 spec/services/price_refresh_service_spec.rb
+spec/services/services_spec.rb
 ```
 
 ---
@@ -1357,12 +1358,18 @@ spec/services/price_refresh_service_spec.rb
 ## PriceQueryService Contract
 
 ```ruby
-service = PriceQueryService.new(repository: CryptoPriceRepository.new, cache: PriceCache.new)
+service = Services.price_query
 result = service.query(symbol: "BTC", currency: "USD", provider: "coingecko")
 
 result.found?      # true when a price exists
 result.not_found?  # true when no price has ever been stored
 result.price_record # cached payload (Hash) or persisted CryptoPrice record
+```
+
+Use the explicit constructor when demonstrating dependency injection in tests:
+
+```ruby
+service = PriceQueryService.new(repository: repository_double, cache: cache_double)
 ```
 
 Read order:
@@ -1377,17 +1384,37 @@ Read order:
 ## PriceRefreshService Contract
 
 ```ruby
-service = PriceRefreshService.new(
-  provider_client: CoinGeckoClient.new,
-  repository: CryptoPriceRepository.new,
-  cache: PriceCache.new
-)
+service = Services.price_refresh
 result = service.refresh(symbol: "BTC", currency: "USD")
 
 result.success?       # true when provider data was persisted and cache updated
 result.failure?       # true when provider or persistence failed
 result.price_record   # the persisted CryptoPrice record on success
 result.error          # the controlled exception on failure
+```
+
+Use the explicit constructor when demonstrating dependency injection in tests:
+
+```ruby
+service = PriceRefreshService.new(
+  provider_client: provider_client_double,
+  repository: repository_double,
+  cache: cache_double
+)
+```
+
+`Services.price_query` and `Services.price_refresh` are the single lightweight composition entry points for application-managed construction. They instantiate existing dependencies only; they do not contain business logic, memoize service instances, introduce hidden global state, or replace explicit service constructor injection.
+
+Demo usage from Docker:
+
+```bash
+docker compose exec web \
+  bin/rails runner \
+  "Services.price_refresh.refresh(symbol: 'BTC', currency: 'USD')"
+
+docker compose exec web \
+  bin/rails runner \
+  "Services.price_query.query(symbol: 'BTC', currency: 'USD')"
 ```
 
 Refresh order:
@@ -1404,6 +1431,7 @@ Refresh order:
 ```bash
 bundle exec rspec spec/services/price_query_service_spec.rb
 bundle exec rspec spec/services/price_refresh_service_spec.rb
+bundle exec rspec spec/services/services_spec.rb
 bundle exec rspec
 bundle exec rubocop
 bundle exec brakeman

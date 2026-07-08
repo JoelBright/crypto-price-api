@@ -456,13 +456,24 @@ docker compose up -d
 The Rails application is available at `http://localhost:3001`. The health check endpoint is at `/up`.
 
 Prepare the database:
-
 ```bash
 docker compose exec web bin/rails db:prepare
 ```
 
-Run the test suite:
+Run demo-friendly service entry points from Rails runner:
+```bash
+docker compose exec web \
+  bin/rails runner \
+  "Services.price_refresh.refresh(symbol: 'BTC', currency: 'USD')"
 
+docker compose exec web \
+  bin/rails runner \
+  "Services.price_query.query(symbol: 'BTC', currency: 'USD')"
+```
+
+`Services.price_refresh` and `Services.price_query` are lightweight composition helpers for console, runner, job, controller, and demo usage. The underlying services still keep explicit constructor injection for tests and focused unit-level usage.
+
+Run the test suite:
 ```bash
 docker compose exec web bundle exec rspec
 ```
