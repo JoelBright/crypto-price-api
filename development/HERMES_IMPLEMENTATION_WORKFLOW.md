@@ -129,6 +129,31 @@ Confirm:
 - blockers
 - scope boundaries
 
+### GitHub Issue Read Command
+
+At the start of every issue, Hermes must read the assigned GitHub issue through GitHub CLI.
+
+Use:
+
+```bash
+gh issue view <issue-number> \
+  --repo JoelBright/crypto-price-api \
+  --json number,title,state,body,labels,url
+```
+
+If running from the repository root, this shorter form is acceptable:
+
+```bash
+gh issue view <issue-number> \
+  --json number,title,state,body,labels,url
+```
+
+If the command fails, stop and report the exact error.
+
+Do not search local files for the issue.
+
+Do not use browser automation to read the issue unless GitHub CLI authentication or availability is confirmed to be the blocker.
+
 ---
 
 ## Step 4

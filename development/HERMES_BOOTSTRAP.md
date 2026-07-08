@@ -31,6 +31,43 @@ Conversation prompts should remain concise and issue-specific.
 
 If a conversation prompt duplicates repository workflow, follow the repository documentation and treat the prompt as a request to execute that documented workflow rather than redefining it.
 
+## GitHub CLI Usage
+
+Hermes must use GitHub CLI for reading GitHub issues and pull requests.
+
+Do not use browser automation to read GitHub issues unless GitHub CLI is unavailable or authentication has failed.
+
+Preferred issue command from any directory:
+
+```bash
+gh issue view <issue-number> \
+  --repo JoelBright/crypto-price-api \
+  --json number,title,state,body,labels,url
+```
+
+Preferred issue command from the repository root:
+
+```bash
+gh issue view <issue-number> \
+  --json number,title,state,body,labels,url
+```
+
+Do not pass a local filesystem path to `--repo`.
+
+Invalid:
+
+```bash
+gh issue view <issue-number> --repo /home/joel/projects/crypto-price-api
+```
+
+Valid:
+
+```bash
+gh issue view <issue-number> --repo JoelBright/crypto-price-api
+```
+
+If the GitHub CLI command fails, Hermes must stop and report the exact error instead of falling back to browser navigation.
+
 ## Progress Reporting
 
 Report progress after each major phase:

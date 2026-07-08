@@ -62,7 +62,7 @@ A planned production-oriented Ruby on Rails API that will retrieve cryptocurrenc
 
 # Project Overview
 
-The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, safe environment placeholders, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, background-processing infrastructure, Docker configuration, or CI configuration.
+The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, FactoryBot, safe environment placeholders, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, background-processing infrastructure, Docker configuration, or CI configuration.
 
 The target Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
 
@@ -294,22 +294,22 @@ sequenceDiagram
 
 # Technology Stack
 
-| Category               | Technology                                       | Purpose                                                                                |
-| ---------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Language               | Ruby                                             | Primary application language.                                                          |
-| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, routing, configuration, and conventions.                  |
-| Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                            |
-| Background Processing  | Deferred                                         | No Sidekiq, Solid Queue, Redis, scheduler, worker, or queue adapter is configured.     |
-| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.                 |
-| HTTP Client            | Deferred                                         | CoinGecko provider integration belongs to a later issue.                               |
-| Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                           |
-| Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                           |
-| Test Data              | Deferred                                         | FactoryBot and Faker are not added until domain tests require them.                    |
-| Coverage               | SimpleCov                                        | Test coverage reporting and threshold enforcement.                                     |
-| Linting                | RuboCop                                          | Ruby style and static analysis.                                                        |
-| Security Scanning      | Brakeman                                         | Rails-focused static security analysis.                                                |
-| Containers             | Docker and Docker Compose                        | Reproducible local development environment.                                            |
-| Continuous Integration | GitHub Actions                                   | Automated test, lint, and security verification.                                       |
+| Category               | Technology                                       | Purpose                                                                            |
+| ---------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Language               | Ruby                                             | Primary application language.                                                      |
+| Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, routing, configuration, and conventions.              |
+| Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                        |
+| Background Processing  | Deferred                                         | No Sidekiq, Solid Queue, Redis, scheduler, worker, or queue adapter is configured. |
+| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.             |
+| HTTP Client            | Deferred                                         | CoinGecko provider integration belongs to a later issue.                           |
+| Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                       |
+| Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                       |
+| Test Data              | FactoryBot                                       | Repeatable model creation for domain tests.                                        |
+| Coverage               | SimpleCov                                        | Test coverage reporting and threshold enforcement.                                 |
+| Linting                | RuboCop                                          | Ruby style and static analysis.                                                    |
+| Security Scanning      | Brakeman                                         | Rails-focused static security analysis.                                            |
+| Containers             | Docker and Docker Compose                        | Reproducible local development environment.                                        |
+| Continuous Integration | GitHub Actions                                   | Automated test, lint, and security verification.                                   |
 
 Exact dependency versions are recorded in `Gemfile.lock`.
 
@@ -476,21 +476,21 @@ The exact coverage-report path may differ by operating system.
 
 ## Required Environment Variables
 
-| Variable                 |              Required | Description                                                                            |
-| ------------------------ | --------------------: | -------------------------------------------------------------------------------------- |
+| Variable                 |                               Required | Description                                                                           |
+| ------------------------ | -------------------------------------: | ------------------------------------------------------------------------------------- |
 | `COINGECKO_API_KEY`      | Placeholder until provider integration | CoinGecko API key for the future external provider client.                            |
-| `DATABASE_NAME`          |                    No | Development database name. Defaults to `crypto_price_api_development`.                |
-| `TEST_DATABASE_NAME`     |                    No | Test database name. Defaults to `crypto_price_api_test`.                              |
-| `DATABASE_HOST`          |                    No | PostgreSQL host when local socket defaults are not used.                              |
-| `DATABASE_PORT`          |                    No | PostgreSQL port when local defaults are not used.                                     |
-| `DATABASE_USERNAME`      |                    No | PostgreSQL username when local defaults are not used.                                 |
-| `DATABASE_PASSWORD`      |                    No | PostgreSQL password when local defaults are not used.                                 |
-| `DATABASE_URL`           | Environment-dependent | Full PostgreSQL connection string override when discrete variables are not used.      |
-| `TEST_DATABASE_URL`      | Environment-dependent | Full test PostgreSQL connection string override when discrete variables are not used. |
-| `RAILS_ENV`              |                    No | Rails environment. Defaults to `development` for local execution.                      |
-| `RAILS_LOG_LEVEL`        |                    No | Application log level.                                                                 |
-| `PRICE_REFRESH_SYMBOLS`  | Deferred              | Future scheduled-refresh configuration; not used by the Issue #2 foundation.          |
-| `PRICE_REFRESH_CURRENCY` | Deferred              | Future quote-currency configuration; not used by the Issue #2 foundation.              |
+| `DATABASE_NAME`          |                                     No | Development database name. Defaults to `crypto_price_api_development`.                |
+| `TEST_DATABASE_NAME`     |                                     No | Test database name. Defaults to `crypto_price_api_test`.                              |
+| `DATABASE_HOST`          |                                     No | PostgreSQL host when local socket defaults are not used.                              |
+| `DATABASE_PORT`          |                                     No | PostgreSQL port when local defaults are not used.                                     |
+| `DATABASE_USERNAME`      |                                     No | PostgreSQL username when local defaults are not used.                                 |
+| `DATABASE_PASSWORD`      |                                     No | PostgreSQL password when local defaults are not used.                                 |
+| `DATABASE_URL`           |                  Environment-dependent | Full PostgreSQL connection string override when discrete variables are not used.      |
+| `TEST_DATABASE_URL`      |                  Environment-dependent | Full test PostgreSQL connection string override when discrete variables are not used. |
+| `RAILS_ENV`              |                                     No | Rails environment. Defaults to `development` for local execution.                     |
+| `RAILS_LOG_LEVEL`        |                                     No | Application log level.                                                                |
+| `PRICE_REFRESH_SYMBOLS`  |                               Deferred | Future scheduled-refresh configuration; not used by the Issue #2 foundation.          |
+| `PRICE_REFRESH_CURRENCY` |                               Deferred | Future quote-currency configuration; not used by the Issue #2 foundation.             |
 
 The current foundation configuration is represented by `.env.example`, `config/database.yml`, and the Rails environment files. Background-job configuration remains deferred.
 

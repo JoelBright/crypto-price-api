@@ -957,7 +957,7 @@ The following areas should approach complete meaningful coverage:
 
 ## Coverage Threshold Enforcement
 
-SimpleCov configuration should enforce the target threshold in CI once the implementation foundation is complete.
+SimpleCov configuration enforces a provisional threshold during foundation work. The threshold will be raised to 95% once domain code and meaningful specs exist.
 
 A coverage decrease requires:
 
