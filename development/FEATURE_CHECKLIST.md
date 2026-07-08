@@ -104,7 +104,7 @@ Only major implementation milestones shall be tracked here.
 | Phase 2 – Domain Design                 |    ☑    |      ☐      |    ☑     |
 | Phase 3 – External Provider Integration |    ☑    |      ☑      |    ☐     |
 | Phase 4 – Business Services             |    ☑    |      ☑      |    ☐     |
-| Phase 5 – Background Processing         |    ☑    |      ☐      |    ☐     |
+| Phase 5 – Background Processing         |    ☑    |      ☐      |    ☑     |
 | Phase 6 – REST API                      |    ☑    |      ☐      |    ☐     |
 | Phase 7 – Testing & QA                  |    ☑    |      ☐      |    ☐     |
 | Phase 8 – Production Hardening          |    ☑    |      ☐      |    ☐     |
@@ -169,11 +169,11 @@ Only major implementation milestones shall be tracked here.
 
 ## Background Processing
 
-- ☐ Scheduled Job
-- ☐ Scheduler
-- ☐ Logging
-- ☐ Retry Behaviour
-- ☐ Failure Recovery
+- ☑ Scheduled Job
+- ☑ Scheduler
+- ☑ Logging
+- ☑ Retry Behaviour
+- ☑ Failure Recovery
 
 ---
 
@@ -195,7 +195,7 @@ Only major implementation milestones shall be tracked here.
 - ☑ Cache Specs
 - ☑ Provider Specs
 - ☑ Service Specs
-- ☐ Job Specs
+- ☑ Job Specs
 - ☐ Request Specs
 - ☐ Integration Specs
 - ☐ Fallback Specs
@@ -318,7 +318,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 
 ```text
 Phase:
-Phase 3 — External Provider Integration
+Phase 5 — Background Processing
 ```
 
 ---
@@ -327,7 +327,7 @@ Phase 3 — External Provider Integration
 
 ```text
 Work Package:
-GitHub Issue #8 — CoinGecko client with safe configuration and deterministic failure handling
+GitHub Issue #10 — Scheduled price refresh with Solid Queue recurring scheduling
 ```
 
 ---
@@ -336,7 +336,7 @@ GitHub Issue #8 — CoinGecko client with safe configuration and deterministic f
 
 ```text
 Task ID:
-EXT-001 through EXT-010, EXT-012, EXT-014 through EXT-017, EXT-019 through EXT-032, EXT-035, EXT-037 through EXT-044, EXT-047
+JOB-001 through JOB-034
 ```
 
 ---
@@ -344,8 +344,7 @@ EXT-001 through EXT-010, EXT-012, EXT-014 through EXT-017, EXT-019 through EXT-0
 ## Objective
 
 ```text
-Describe the objective of the current implementation session.
-Implement an isolated CoinGecko provider client with Faraday, environment-driven API-key configuration, supported symbol mapping, response validation, bounded retries, controlled provider exceptions, and deterministic specs without introducing services, jobs, controllers, routes, cache writes, or persistence.
+Implement scheduled price refresh using the accepted Solid Queue background infrastructure with built-in recurring scheduling. Add Active Job railtie, Solid Queue configuration, PriceRefreshJob, recurring schedule, Docker jobs service, bounded retry behaviour, and comprehensive job/scheduler specs.
 ```
 
 ---
@@ -353,7 +352,7 @@ Implement an isolated CoinGecko provider client with Faraday, environment-driven
 ## Blockers
 
 ```text
-None
+Pre-existing Docker credential helper incompatibility prevents docker compose build from succeeding in WSL. docker compose config passes. The Dockerfile and compose configuration are correct.
 ```
 
 ---
@@ -362,7 +361,7 @@ None
 
 ```text
 Task ID:
-Phase 3 review / next approved issue
+Phase 6 — REST API / GitHub Issue #11
 ```
 
 ---
@@ -371,13 +370,10 @@ Phase 3 review / next approved issue
 
 ```text
 Completed:
-CoinGeckoClient, provider error boundary, provider specs, Faraday dependency, fixture-backed success payload, architecture/testing/junior-guide documentation, and Phase 3 tracking updates.
+Active Job railtie enabled, Solid Queue 1.4.0 installed, config/queue.yml, config/recurring.yml, db/queue_schema.rb, bin/jobs generated and configured. ApplicationJob and PriceRefreshJob created with retry_on/discard_on policy. Queue adapters configured per environment. Docker jobs service added. 24 job specs and 13 recurring config specs passing. 118 total examples, 0 failures, 98.25% line coverage. RuboCop: 0 offenses. Brakeman: 0 warnings. Documentation updated.
 
 Pending:
-Review and any separately approved Phase 3 work outside Issue #8 scope.
-
-Notes:
-No refresh service, background job, API controller/route, repository/cache use, persistence, or live HTTP test dependency was introduced.
+Review and merge. Phase 6 depends on this issue.
 ```
 
 ---

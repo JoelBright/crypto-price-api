@@ -215,21 +215,21 @@ Create a local `.env` file later in the guide. Do not paste the real key into:
 
 This guide uses accepted target choices where decisions are approved and marks unresolved implementation choices as proposed or deferred.
 
-| Concern                    | Selected Technology              | Why                                                                                    |
-| -------------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Web framework              | Rails API mode                   | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions.       |
-| Durable storage            | PostgreSQL                       | Reliable relational storage and a realistic production database.                       |
-| Background execution       | Solid Queue 1.4+                 | Database-backed Active Job backend; default in Rails 8. No Redis required.             |
-| Scheduling                 | Solid Queue recurring tasks      | Built-in recurring scheduling via `config/recurring.yml`. No separate scheduler gem.   |
-| Background queue and cache | Solid Queue for queue; Memory Store for cache | PostgreSQL-backed queue; Rails Memory Store for cache with PostgreSQL fallback. |
-| HTTP client                | Faraday                          | Explicit timeout configuration and testable provider communication.                    |
-| Test framework             | RSpec                            | Standard Ruby behaviour-driven testing.                                                |
-| Test fixtures              | FactoryBot                       | Clear, repeatable model creation.                                                      |
-| Coverage                   | SimpleCov                        | Enforces test-coverage visibility.                                                     |
-| Linting                    | RuboCop                          | Ruby code-quality checks.                                                              |
-| Security scanning          | Brakeman                         | Rails-focused static security analysis.                                                |
-| Containers                 | Docker Compose                   | Web and jobs services with PostgreSQL. No Redis required.                              |
-| CI                         | GitHub Actions                   | Automated checks on remote pushes and pull requests.                                   |
+| Concern                    | Selected Technology                           | Why                                                                                  |
+| -------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Web framework              | Rails API mode                                | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions.     |
+| Durable storage            | PostgreSQL                                    | Reliable relational storage and a realistic production database.                     |
+| Background execution       | Solid Queue 1.4+                              | Database-backed Active Job backend; default in Rails 8. No Redis required.           |
+| Scheduling                 | Solid Queue recurring tasks                   | Built-in recurring scheduling via `config/recurring.yml`. No separate scheduler gem. |
+| Background queue and cache | Solid Queue for queue; Memory Store for cache | PostgreSQL-backed queue; Rails Memory Store for cache with PostgreSQL fallback.      |
+| HTTP client                | Faraday                                       | Explicit timeout configuration and testable provider communication.                  |
+| Test framework             | RSpec                                         | Standard Ruby behaviour-driven testing.                                              |
+| Test fixtures              | FactoryBot                                    | Clear, repeatable model creation.                                                    |
+| Coverage                   | SimpleCov                                     | Enforces test-coverage visibility.                                                   |
+| Linting                    | RuboCop                                       | Ruby code-quality checks.                                                            |
+| Security scanning          | Brakeman                                      | Rails-focused static security analysis.                                              |
+| Containers                 | Docker Compose                                | Web and jobs services with PostgreSQL. No Redis required.                            |
+| CI                         | GitHub Actions                                | Automated checks on remote pushes and pull requests.                                 |
 
 The background infrastructure decisions have been validated in Issue #5. See ADR-017 and ADR-018 in `ENGINEERING_JOURNAL.md` for full rationale.
 
@@ -1425,3 +1425,237 @@ Expected result:
 - Letting raw ActiveRecord exceptions escape the repository boundary.
 - Adding HTTP status codes, controller logic, or scheduler configuration to service code.
 - Creating service objects that duplicate repository, cache, or provider behaviour instead of delegating.
+
+---
+
+# 18. Configure Background Processing
+
+## Goal
+
+Implement the background processing layer that refreshes cryptocurrency prices every minute using Solid Queue with built-in recurring scheduling.
+
+---
+
+## Why This Exists
+
+Background processing separates scheduled price refresh from API requests. The REST API never calls CoinGecko directly. Instead, the recurring scheduler enqueues `PriceRefreshJob` every minute, which delegates to `PriceRefreshService`. This ensures:
+
+- API response times are independent of provider latency.
+- Failed provider calls do not block API responses.
+- The last known price remains available during provider outages.
+
+---
+
+## Files
+
+Create:
+
+```text
+app/jobs/application_job.rb
+app/jobs/price_refresh_job.rb
+spec/jobs/price_refresh_job_spec.rb
+spec/config/recurring_configuration_spec.rb
+```
+
+Update `Gemfile`:
+
+```ruby
+gem "solid_queue", "~> 1.4"
+```
+
+Then run:
+
+```bash
+bundle install
+bundle exec rails generate solid_queue:install
+```
+
+The generator creates:
+
+```text
+config/queue.yml
+config/recurring.yml
+db/queue_schema.rb
+bin/jobs
+```
+
+---
+
+## Enable Active Job
+
+Add the Active Job railtie in `config/application.rb`:
+
+```ruby
+require "active_job/railtie"
+```
+
+## Configure Queue Adapters
+
+**`config/environments/development.rb`**:
+
+```ruby
+config.active_job.queue_adapter = :solid_queue
+```
+
+**`config/environments/production.rb`**:
+
+```ruby
+config.active_job.queue_adapter = :solid_queue
+```
+
+**`config/environments/test.rb`**:
+
+```ruby
+config.active_job.queue_adapter = :test
+```
+
+The test adapter keeps jobs controlled by specs. The Solid Queue adapter is used in development and production for real asynchronous execution.
+
+---
+
+## ApplicationJob
+
+**`app/jobs/application_job.rb`**:
+
+```ruby
+class ApplicationJob < ActiveJob::Base
+end
+```
+
+---
+
+## PriceRefreshJob Contract
+
+```ruby
+job = PriceRefreshJob.new
+job.perform(symbol: "BTC", currency: "USD")
+```
+
+The job:
+
+- Subclasses `ApplicationJob`.
+- Uses the `:default` queue.
+- Accepts `symbol:` (required) and `currency:` (defaults to `"USD"`).
+- Builds `PriceRefreshService` with `CoinGeckoClient`, `CryptoPriceRepository`, and `PriceCache`.
+- Delegates to `PriceRefreshService#refresh`.
+- Contains no business logic, provider parsing, persistence, or cache code.
+- Logs job lifecycle events.
+
+### Retry and Discard Policy
+
+| Error Class                             | Behaviour | Attempts | Wait      |
+| --------------------------------------- | --------- | -------- | --------- |
+| `ProviderError::TimeoutError`           | Retry     | 3        | 5 seconds |
+| `ProviderError::NetworkError`           | Retry     | 3        | 5 seconds |
+| `ProviderError::HttpError`              | Retry     | 3        | 5 seconds |
+| `ProviderError::ConfigurationError`     | Discard   | 1        | —         |
+| `ProviderError::UnsupportedSymbolError` | Discard   | 1        | —         |
+
+Retryable errors are bounded (3 attempts) with a 5-second linear wait. Non-retryable errors are discarded immediately — the next scheduled execution will attempt again.
+
+---
+
+## Recurring Schedule
+
+**`config/recurring.yml`**:
+
+```yaml
+default: &default
+  price_refresh_btc:
+    class: PriceRefreshJob
+    queue: default
+    args: [{ symbol: "BTC", currency: "USD" }]
+    schedule: every minute
+
+  price_refresh_eth:
+    class: PriceRefreshJob
+    queue: default
+    args: [{ symbol: "ETH", currency: "USD" }]
+    schedule: every minute
+
+development:
+  <<: *default
+
+production:
+  <<: *default
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+```
+
+One job per symbol keeps failures isolated. The `default` YAML anchor is shared across environments.
+
+---
+
+## Docker Jobs Service
+
+Add to `docker-compose.yml`:
+
+```yaml
+jobs:
+  build: .
+  command: bundle exec bin/jobs
+  environment:
+    RAILS_ENV: development
+    DATABASE_URL: postgresql://postgres:***@db:5432/crypto_price_api_development
+    RAILS_MAX_THREADS: 5
+    RAILS_LOG_LEVEL: debug
+  depends_on:
+    db:
+      condition: service_healthy
+  volumes:
+    - .:/app
+```
+
+Solid Queue's `bin/jobs` supervisor manages workers, dispatchers, and the recurring-task scheduler in a single process. No Redis service is required.
+
+---
+
+## Verification
+
+```bash
+# Verify job enqueueing
+bundle exec rails runner "PriceRefreshJob.perform_later(symbol: 'BTC', currency: 'USD')"
+
+# Verify recurring schedule configuration
+bundle exec rails runner "YAML.load_file(Rails.root.join('config/recurring.yml'), aliases: true)"
+
+# Run job and scheduler specs
+bundle exec rspec spec/jobs
+bundle exec rspec spec/config/recurring_configuration_spec.rb
+
+# Run the full suite
+bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
+
+Expected results:
+
+- 37 job and scheduler specs pass (24 job specs, 13 recurring config specs).
+- 118 total examples, 0 failures.
+- RuboCop: 48 files, no offenses.
+- Brakeman: 0 warnings.
+
+---
+
+## Why Solid Queue Instead of Sidekiq?
+
+Solid Queue was selected over Sidekiq (see ADR-017 in `ENGINEERING_JOURNAL.md`) for these reasons:
+
+| Reason                        | Detail                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| No Redis dependency           | Eliminates an entire infrastructure service from Docker Compose.               |
+| Built-in recurring scheduling | No separate scheduler gem (sidekiq-scheduler, rufus-scheduler).                |
+| Rails 8 default               | Deep framework integration and Rails core maintenance.                         |
+| Database-backed               | Uses PostgreSQL for job storage alongside application data.                    |
+| MIT license                   | Consistent with the project's existing dependencies.                           |
+| Simpler Docker                | `bin/jobs` supervisor replaces both a Redis container and a Sidekiq container. |
+
+## Common Mistakes
+
+- Adding business logic (provider parsing, persistence, cache updates, fallback rules) to the job.
+- Calling `perform_now` from the scheduler configuration.
+- Waiting for a real minute in tests.
+- Adding Redis or Sidekiq dependencies.
+- Forgetting to enable the Active Job railtie.

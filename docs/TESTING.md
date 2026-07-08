@@ -875,11 +875,11 @@ Resilience tests should simulate at least:
 
 ---
 
-# 12. Background Job Testing
+## Background Job Testing
 
 Background jobs are tested as orchestration boundaries.
 
-```mermaid id="xwby2f"
+```mermaid
 flowchart LR
     JobSpec[PriceRefreshJob Spec]
     ServiceDouble[Refresh Service Boundary]
@@ -891,7 +891,7 @@ flowchart LR
     ServiceDouble --> Assertions
 ```
 
-## Job Test Requirements
+### Job Test Requirements
 
 Job specs must verify:
 
@@ -902,20 +902,37 @@ Job specs must verify:
 - The job follows configured retry behaviour where supported.
 - Controlled failures are surfaced or handled predictably.
 
-## Scheduler Verification
+### Retry/Discard Policy Verification
+
+Rather than executing retry cycles (which would raise `Minitest::UnexpectedError` after exhaustion), retry and discard policy is verified through **class introspection**:
+
+```ruby
+# Inspect the rescue_handlers to confirm retry/discard registration
+expect(PriceRefreshJob.rescue_handlers.map(&:first)).to include("ProviderError::TimeoutError")
+```
+
+Discard behaviour is verified at runtime by raising the error and asserting it does not propagate:
+
+```ruby
+allow(service_double).to receive(:refresh).and_raise(ProviderError::ConfigurationError, "no key")
+perform_enqueued_jobs { PriceRefreshJob.perform_later(symbol: "BTC", currency: "USD") }
+expect(service_double).to have_received(:refresh).once
+```
+
+### Scheduler Verification
 
 The scheduler should not be tested by waiting for a real minute.
 
-Instead, tests should verify the scheduler configuration or scheduling registration.
-
-Examples of acceptable verification:
+Instead, the tests in `spec/config/recurring_configuration_spec.rb` use `ActiveSupport::ConfigurationFile.parse` (the same loader Solid Queue uses) to verify:
 
 - Schedule definition includes the expected one-minute interval.
-- Selected scheduler is configured to enqueue `PriceRefreshJob`.
+- Scheduler is configured to enqueue `PriceRefreshJob`.
 - Scheduler configuration is loaded successfully in the intended environment.
 - Configuration uses the expected symbols and quote currency.
+- Both development and production environments include the correct task set.
+- Production also includes a maintenance task (`clear_solid_queue_finished_jobs`).
 
-The exact test approach depends on the selected scheduler library and must be documented after implementation.
+No real one-minute wait is required for any test.
 
 ---
 

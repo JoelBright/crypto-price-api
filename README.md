@@ -2,7 +2,7 @@
 
 A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** Rails API foundation, Docker, CI, and repository governance complete; background infrastructure decision validated (Solid Queue with recurring scheduling); domain, provider, API endpoint remain deferred
+> **Project Status:** Rails API foundation, Docker, CI, repository governance, domain design, CoinGecko provider integration, application services, and background processing (Solid Queue with recurring scheduling) complete; REST API endpoint and release certification remain deferred.
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
