@@ -325,12 +325,12 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                               | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | ---------------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| DOM-021 | Define repository interface        | Critical | DOM-015    | NFR-005              | Interface reviewed           | ☐      |
-| DOM-022 | Implement CryptoPriceRepository    | Critical | DOM-021    | FR-005               | Repository specs pass        | ☐      |
-| DOM-023 | Implement find by symbol           | High     | DOM-022    | FR-005               | Repository specs pass        | ☐      |
-| DOM-024 | Implement create/update behaviour  | High     | DOM-022    | FR-005               | Repository specs pass        | ☐      |
-| DOM-025 | Prevent ActiveRecord leakage       | High     | DOM-022    | NFR-005              | Code review completed        | ☐      |
-| DOM-026 | Review repository responsibilities | Medium   | DOM-025    | NFR-002              | Engineering review completed | ☐      |
+| DOM-021 | Define repository interface        | Critical | DOM-015    | NFR-005              | Interface reviewed           | ☑      |
+| DOM-022 | Implement CryptoPriceRepository    | Critical | DOM-021    | FR-005               | Repository specs pass        | ☑      |
+| DOM-023 | Implement find by symbol           | High     | DOM-022    | FR-005               | Repository specs pass        | ☑      |
+| DOM-024 | Implement create/update behaviour  | High     | DOM-022    | FR-005               | Repository specs pass        | ☑      |
+| DOM-025 | Prevent ActiveRecord leakage       | High     | DOM-022    | NFR-005              | Code review completed        | ☑      |
+| DOM-026 | Review repository responsibilities | Medium   | DOM-025    | NFR-002              | Engineering review completed | ☑      |
 
 ---
 
@@ -338,12 +338,12 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                             | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | -------------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| DOM-027 | Define cache interface           | High     | DOM-021    | FR-006               | Interface reviewed           | ☐      |
-| DOM-028 | Implement PriceCache abstraction | Critical | DOM-027    | FR-006               | Cache specs pass             | ☐      |
-| DOM-029 | Implement cache read operation   | High     | DOM-028    | FR-006               | Cache specs pass             | ☐      |
-| DOM-030 | Implement cache write operation  | High     | DOM-028    | FR-006               | Cache specs pass             | ☐      |
-| DOM-031 | Implement cache invalidation     | Medium   | DOM-028    | FR-006               | Cache specs pass             | ☐      |
-| DOM-032 | Verify cache isolation           | High     | DOM-031    | NFR-005              | Architecture review complete | ☐      |
+| DOM-027 | Define cache interface           | High     | DOM-021    | FR-006               | Interface reviewed           | ☑      |
+| DOM-028 | Implement PriceCache abstraction | Critical | DOM-027    | FR-006               | Cache specs pass             | ☑      |
+| DOM-029 | Implement cache read operation   | High     | DOM-028    | FR-006               | Cache specs pass             | ☑      |
+| DOM-030 | Implement cache write operation  | High     | DOM-028    | FR-006               | Cache specs pass             | ☑      |
+| DOM-031 | Implement cache invalidation     | Medium   | DOM-028    | FR-006               | Cache specs pass             | ☑      |
+| DOM-032 | Verify cache isolation           | High     | DOM-031    | NFR-005              | Architecture review complete | ☑      |
 
 ---
 
@@ -373,10 +373,10 @@ Upon completion of this phase the repository shall contain:
 | ------- | ------------------------------- | -------- | ---------- | -------------------- | -------------------- | ------ |
 | DOM-039 | Write model specifications      | Critical | DOM-015    | NFR-011              | Specs pass           | ☑      |
 | DOM-040 | Write validation specifications | Critical | DOM-039    | NFR-011              | Specs pass           | ☑      |
-| DOM-041 | Write repository specifications | Critical | DOM-026    | NFR-011              | Specs pass           | ☐      |
-| DOM-042 | Write cache specifications      | Critical | DOM-032    | NFR-011              | Specs pass           | ☐      |
+| DOM-041 | Write repository specifications | Critical | DOM-026    | NFR-011              | Specs pass           | ☑      |
+| DOM-042 | Write cache specifications      | Critical | DOM-032    | NFR-011              | Specs pass           | ☑      |
 | DOM-043 | Verify migration behaviour      | Medium   | DOM-020    | NFR-011              | Migration tests pass | ☐      |
-| DOM-044 | Review test coverage            | High     | DOM-043    | NFR-011              | Coverage verified    | ☐      |
+| DOM-044 | Review test coverage            | High     | DOM-043    | NFR-011              | Coverage verified    | ☑      |
 
 ---
 
@@ -385,7 +385,7 @@ Upon completion of this phase the repository shall contain:
 | ID      | Task                          | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ----------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
 | DOM-045 | Update DATABASE.md            | High     | DOM-020    | NFR-015              | Documentation reviewed      | ☑      |
-| DOM-046 | Update ARCHITECTURE.md        | High     | DOM-032    | NFR-015              | Documentation reviewed      | ☐      |
+| DOM-046 | Update ARCHITECTURE.md        | High     | DOM-032    | NFR-015              | Documentation reviewed      | ☑      |
 | DOM-047 | Record engineering decisions  | High     | DOM-046    | NFR-015              | Engineering Journal updated | ☐      |
 | DOM-048 | Update Junior Developer Guide | Medium   | DOM-047    | NFR-015              | Documentation reviewed      | ☐      |
 

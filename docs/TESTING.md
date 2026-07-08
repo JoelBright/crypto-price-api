@@ -272,6 +272,12 @@ Target location:
 spec/repositories/crypto_price_repository_spec.rb
 ```
 
+Current implementation status:
+
+- `CryptoPriceRepository#find` is covered for normalized lookup, missing records, and composite-key matching.
+- `CryptoPriceRepository#upsert` is covered for create, update, persisted return values, and duplicate current-record prevention.
+- Repository boundary specs verify that the repository does not perform cache or logging orchestration.
+
 ---
 
 ## Cache Specifications
@@ -292,6 +298,14 @@ Target location:
 ```text id="4r87ye"
 spec/cache/price_cache_spec.rb
 ```
+
+Current implementation status:
+
+- `PriceCache#key` is covered for stable normalized key construction.
+- `PriceCache#read` and `PriceCache#write` are covered with an injected Rails cache-compatible memory store.
+- `PriceCache#delete` is covered for cache invalidation.
+- Cache miss behaviour returns `nil`.
+- Specs verify injected cache-store usage without Redis-specific APIs.
 
 ---
 
@@ -957,7 +971,9 @@ The following areas should approach complete meaningful coverage:
 
 ## Coverage Threshold Enforcement
 
-SimpleCov configuration enforces a provisional threshold during foundation work. The threshold will be raised to 95% once domain code and meaningful specs exist.
+SimpleCov configuration enforces a provisional threshold during full-suite runs. Focused directory or file runs are used for fast local feedback and still generate coverage reports, but the aggregate threshold is enforced by `bundle exec rspec`.
+
+The threshold will be raised to 95% once domain code and meaningful specs exist.
 
 A coverage decrease requires:
 
@@ -1064,6 +1080,18 @@ bundle exec rspec spec/services/price_query_service_spec.rb:42
 
 ```bash id="q1zdl8"
 bundle exec rspec spec/models
+```
+
+## Run Repository Tests
+
+```bash
+bundle exec rspec spec/repositories/
+```
+
+## Run Cache Tests
+
+```bash
+bundle exec rspec spec/cache/
 ```
 
 ## Run Request Tests

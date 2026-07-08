@@ -101,7 +101,7 @@ Only major implementation milestones shall be tracked here.
 | Phase                                   | Planned | In Progress | Complete |
 | --------------------------------------- | :-----: | :---------: | :------: |
 | Phase 1 – Repository Foundation         |    ☑    |      ☐      |    ☑     |
-| Phase 2 – Domain Design                 |    ☑    |      ☐      |    ☐     |
+| Phase 2 – Domain Design                 |    ☑    |      ☑      |    ☐     |
 | Phase 3 – External Provider Integration |    ☑    |      ☐      |    ☐     |
 | Phase 4 – Business Services             |    ☑    |      ☐      |    ☐     |
 | Phase 5 – Background Processing         |    ☑    |      ☐      |    ☐     |
@@ -140,8 +140,8 @@ Only major implementation milestones shall be tracked here.
 
 - ☑ CryptoPrice Model
 - ☑ Database Schema
-- ☐ Repository Layer
-- ☐ Cache Layer
+- ☑ Repository Layer
+- ☑ Cache Layer
 - ☑ Model Validations
 
 ---
@@ -191,8 +191,8 @@ Only major implementation milestones shall be tracked here.
 ## Testing
 
 - ☑ Model Specs
-- ☐ Repository Specs
-- ☐ Cache Specs
+- ☑ Repository Specs
+- ☑ Cache Specs
 - ☐ Provider Specs
 - ☐ Service Specs
 - ☐ Job Specs
@@ -267,9 +267,9 @@ Every implementation phase shall satisfy the following quality gates before it i
 
 | Test Area          | Status |
 | ------------------ | ------ |
-| Models             | ☐      |
-| Repository         | ☐      |
-| Cache              | ☐      |
+| Models             | ☑      |
+| Repository         | ☑      |
+| Cache              | ☑      |
 | External Client    | ☐      |
 | Services           | ☐      |
 | Background Jobs    | ☐      |
@@ -318,6 +318,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 
 ```text
 Phase:
+Phase 2 — Domain Design
 ```
 
 ---
@@ -326,6 +327,7 @@ Phase:
 
 ```text
 Work Package:
+GitHub Issue #7 — CryptoPriceRepository and PriceCache boundaries
 ```
 
 ---
@@ -334,6 +336,7 @@ Work Package:
 
 ```text
 Task ID:
+DOM-021 through DOM-032, DOM-041, DOM-042, DOM-044, DOM-046
 ```
 
 ---
@@ -342,6 +345,7 @@ Task ID:
 
 ```text
 Describe the objective of the current implementation session.
+Implement the repository and cache abstractions without introducing Redis, provider integration, background jobs, controllers, services, or database schema changes.
 ```
 
 ---
@@ -358,6 +362,7 @@ None
 
 ```text
 Task ID:
+Phase 2 review / next approved issue
 ```
 
 ---
@@ -366,10 +371,13 @@ Task ID:
 
 ```text
 Completed:
+CryptoPriceRepository, PriceCache, repository specs, cache specs, architecture/testing documentation, and Phase 2 tracking updates.
 
 Pending:
+Final review and any separately approved Phase 2 documentation tasks outside Issue #7 scope.
 
 Notes:
+No schema changes were made; DATABASE.md was intentionally left unchanged.
 ```
 
 ---
