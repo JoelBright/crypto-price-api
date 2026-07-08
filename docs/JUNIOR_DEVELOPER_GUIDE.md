@@ -1210,3 +1210,116 @@ git commit -m "chore: configure RSpec coverage and quality checks"
 > Continue with the next part of this guide after completing and verifying Sections 1–13.
 >
 > The next section creates `CryptoPrice`, its migration, database constraints, FactoryBot factory, repository boundary, accepted cache abstraction, provider client, services, accepted scheduling approach, API endpoint, complete tests, CI workflow, and release validation.
+
+---
+
+# 16. Implement the CoinGecko Provider Client
+
+## Goal
+
+Create the isolated provider boundary used by later refresh services to retrieve current cryptocurrency prices from CoinGecko.
+
+---
+
+## Why This Exists
+
+Provider communication is intentionally isolated from controllers, repositories, cache code, services, and background jobs. A dedicated client keeps authentication, request construction, response parsing, timeout handling, bounded retries, and provider error translation in one place.
+
+The public request path must not call this client directly.
+
+---
+
+## Files
+
+Create:
+
+```text
+app/clients/provider_error.rb
+app/clients/coin_gecko_client.rb
+spec/clients/coin_gecko_client_spec.rb
+spec/fixtures/files/coingecko/simple_price_success.json
+```
+
+Update `Gemfile` to include Faraday:
+
+```ruby
+gem "faraday", "~> 2.0"
+```
+
+Then run:
+
+```bash
+bundle install
+```
+
+---
+
+## Client Contract
+
+The client exposes one public method:
+
+```ruby
+fetch_price(symbol:, currency: "usd")
+```
+
+It returns normalized application-level data:
+
+```ruby
+{
+  symbol: "BTC",
+  price: BigDecimal("109283.12"),
+  currency: "USD",
+  provider: "coingecko",
+  fetched_at: Time.current
+}
+```
+
+The initial supported mapping is:
+
+| Symbol | CoinGecko ID |
+| ------ | ------------ |
+| `btc`  | `bitcoin`    |
+| `eth`  | `ethereum`   |
+
+---
+
+## Configuration and Safety Rules
+
+- Read the provider credential from `COINGECKO_API_KEY`.
+- Do not hardcode API keys.
+- Do not log API keys.
+- Do not expose API keys in raised exception messages.
+- Use configured request and open timeouts.
+- Keep retry behaviour bounded.
+- Translate provider and HTTP-client failures into `ProviderError` exceptions.
+
+---
+
+## Verification
+
+Run:
+
+```bash
+RAILS_ENV=test bundle exec rspec spec/clients/coin_gecko_client_spec.rb
+RAILS_ENV=test bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
+
+Expected result:
+
+- Provider specs pass without live HTTP calls.
+- The full suite passes.
+- RuboCop reports no offenses.
+- Brakeman reports no warnings.
+
+---
+
+## Common Mistakes
+
+- Calling CoinGecko from a controller or request spec.
+- Persisting prices from the provider client.
+- Updating cache from the provider client.
+- Requiring a real API key in automated tests.
+- Allowing raw Faraday or JSON parser exceptions to escape the provider boundary.
+- Logging request headers or provider response bodies that may contain secrets.

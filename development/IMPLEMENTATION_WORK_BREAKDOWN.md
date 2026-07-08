@@ -487,11 +487,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                                          | Priority | Depends On | Related Requirements | Verification                  | Status |
 | ------- | --------------------------------------------- | -------- | ---------- | -------------------- | ----------------------------- | ------ |
-| EXT-001 | Identify provider responsibilities            | Critical | DOM-048    | FR-003               | Responsibilities documented   | ☐      |
-| EXT-002 | Define provider interface                     | Critical | EXT-001    | NFR-005              | Interface reviewed            | ☐      |
-| EXT-003 | Define provider response contract             | High     | EXT-002    | FR-003               | Contract reviewed             | ☐      |
-| EXT-004 | Review provider boundary against architecture | High     | EXT-003    | NFR-002              | Architecture review completed | ☐      |
-| EXT-005 | Document provider assumptions                 | Medium   | EXT-004    | NFR-015              | Documentation updated         | ☐      |
+| EXT-001 | Identify provider responsibilities            | Critical | DOM-048    | FR-003               | Responsibilities documented   | ☑      |
+| EXT-002 | Define provider interface                     | Critical | EXT-001    | NFR-005              | Interface reviewed            | ☑      |
+| EXT-003 | Define provider response contract             | High     | EXT-002    | FR-003               | Contract reviewed             | ☑      |
+| EXT-004 | Review provider boundary against architecture | High     | EXT-003    | NFR-002              | Architecture review completed | ☑      |
+| EXT-005 | Document provider assumptions                 | Medium   | EXT-004    | NFR-015              | Documentation updated         | ☑      |
 
 ---
 
@@ -499,11 +499,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                         | Priority | Depends On | Related Requirements | Verification                   | Status |
 | ------- | ---------------------------- | -------- | ---------- | -------------------- | ------------------------------ | ------ |
-| EXT-006 | Select HTTP client library   | High     | EXT-002    | NFR-001              | Decision documented            | ☐      |
-| EXT-007 | Create CoinGecko client      | Critical | EXT-006    | FR-003               | Client loads successfully      | ☐      |
-| EXT-008 | Configure HTTP connection    | High     | EXT-007    | FR-003               | Requests succeed               | ☐      |
-| EXT-009 | Configure request headers    | High     | EXT-008    | FR-003               | Requests verified              | ☐      |
-| EXT-010 | Configure authentication     | Critical | EXT-009    | FR-003               | Authenticated request verified | ☐      |
+| EXT-006 | Select HTTP client library   | High     | EXT-002    | NFR-001              | Decision documented            | ☑      |
+| EXT-007 | Create CoinGecko client      | Critical | EXT-006    | FR-003               | Client loads successfully      | ☑      |
+| EXT-008 | Configure HTTP connection    | High     | EXT-007    | FR-003               | Requests succeed               | ☑      |
+| EXT-009 | Configure request headers    | High     | EXT-008    | FR-003               | Requests verified              | ☑      |
+| EXT-010 | Configure authentication     | Critical | EXT-009    | FR-003               | Authenticated request verified | ☑      |
 | EXT-011 | Verify provider connectivity | Critical | EXT-010    | FR-003               | Live request succeeds          | ☐      |
 
 ---
@@ -512,10 +512,10 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                               | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ---------------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| EXT-012 | Configure environment variables    | Critical | EXT-010    | NFR-014              | Variables loaded            | ☐      |
+| EXT-012 | Configure environment variables    | Critical | EXT-010    | NFR-014              | Variables loaded            | ☑      |
 | EXT-013 | Configure Rails credentials        | High     | EXT-012    | NFR-014              | Credentials verified        | ☐      |
-| EXT-014 | Separate environment configuration | High     | EXT-013    | NFR-013              | Configuration reviewed      | ☐      |
-| EXT-015 | Verify secret isolation            | Critical | EXT-014    | NFR-014              | Repository review completed | ☐      |
+| EXT-014 | Separate environment configuration | High     | EXT-013    | NFR-013              | Configuration reviewed      | ☑      |
+| EXT-015 | Verify secret isolation            | Critical | EXT-014    | NFR-014              | Repository review completed | ☑      |
 
 ---
 
@@ -523,11 +523,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                        | Priority | Depends On | Related Requirements | Verification               | Status |
 | ------- | --------------------------- | -------- | ---------- | -------------------- | -------------------------- | ------ |
-| EXT-016 | Parse provider response     | High     | EXT-011    | FR-003               | Parsing verified           | ☐      |
-| EXT-017 | Validate response structure | Critical | EXT-016    | FR-003               | Validation specs pass      | ☐      |
-| EXT-018 | Validate required fields    | High     | EXT-017    | FR-003               | Validation specs pass      | ☐      |
-| EXT-019 | Validate numeric values     | High     | EXT-018    | FR-003               | Validation specs pass      | ☐      |
-| EXT-020 | Reject malformed responses  | Critical | EXT-019    | FR-007               | Failure behaviour verified | ☐      |
+| EXT-016 | Parse provider response     | High     | EXT-011    | FR-003               | Parsing verified           | ☑      |
+| EXT-017 | Validate response structure | Critical | EXT-016    | FR-003               | Validation specs pass      | ☑      |
+| EXT-018 | Validate required fields    | High     | EXT-017    | FR-003               | Validation specs pass      | ☑      |
+| EXT-019 | Validate numeric values     | High     | EXT-018    | FR-003               | Validation specs pass      | ☑      |
+| EXT-020 | Reject malformed responses  | Critical | EXT-019    | FR-007               | Failure behaviour verified | ☑      |
 
 ---
 
@@ -535,9 +535,9 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                         | Priority | Depends On | Related Requirements | Verification     | Status |
 | ------- | ---------------------------- | -------- | ---------- | -------------------- | ---------------- | ------ |
-| EXT-021 | Configure connection timeout | High     | EXT-011    | FR-007               | Timeout verified | ☐      |
-| EXT-022 | Configure read timeout       | High     | EXT-021    | FR-007               | Timeout verified | ☐      |
-| EXT-023 | Verify timeout behaviour     | High     | EXT-022    | FR-007               | Specs pass       | ☐      |
+| EXT-021 | Configure connection timeout | High     | EXT-011    | FR-007               | Timeout verified | ☑      |
+| EXT-022 | Configure read timeout       | High     | EXT-021    | FR-007               | Timeout verified | ☑      |
+| EXT-023 | Verify timeout behaviour     | High     | EXT-022    | FR-007               | Specs pass       | ☑      |
 
 ---
 
@@ -545,10 +545,10 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                      | Priority | Depends On | Related Requirements | Verification      | Status |
 | ------- | ------------------------- | -------- | ---------- | -------------------- | ----------------- | ------ |
-| EXT-024 | Define retry policy       | High     | EXT-023    | FR-007               | Policy documented | ☐      |
-| EXT-025 | Implement retry behaviour | High     | EXT-024    | FR-007               | Retry verified    | ☐      |
-| EXT-026 | Verify retry limits       | Medium   | EXT-025    | FR-007               | Tests pass        | ☐      |
-| EXT-027 | Prevent infinite retries  | Critical | EXT-026    | FR-007               | Review completed  | ☐      |
+| EXT-024 | Define retry policy       | High     | EXT-023    | FR-007               | Policy documented | ☑      |
+| EXT-025 | Implement retry behaviour | High     | EXT-024    | FR-007               | Retry verified    | ☑      |
+| EXT-026 | Verify retry limits       | Medium   | EXT-025    | FR-007               | Tests pass        | ☑      |
+| EXT-027 | Prevent infinite retries  | Critical | EXT-026    | FR-007               | Review completed  | ☑      |
 
 ---
 
@@ -556,11 +556,11 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                                | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ----------------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| EXT-028 | Define provider exception hierarchy | High     | EXT-020    | NFR-002              | Design reviewed             | ☐      |
-| EXT-029 | Translate HTTP failures             | Critical | EXT-028    | FR-007               | Specs pass                  | ☐      |
-| EXT-030 | Translate timeout failures          | High     | EXT-029    | FR-007               | Specs pass                  | ☐      |
-| EXT-031 | Translate parsing failures          | High     | EXT-030    | FR-007               | Specs pass                  | ☐      |
-| EXT-032 | Verify predictable exceptions       | High     | EXT-031    | NFR-002              | Engineering review complete | ☐      |
+| EXT-028 | Define provider exception hierarchy | High     | EXT-020    | NFR-002              | Design reviewed             | ☑      |
+| EXT-029 | Translate HTTP failures             | Critical | EXT-028    | FR-007               | Specs pass                  | ☑      |
+| EXT-030 | Translate timeout failures          | High     | EXT-029    | FR-007               | Specs pass                  | ☑      |
+| EXT-031 | Translate parsing failures          | High     | EXT-030    | FR-007               | Specs pass                  | ☑      |
+| EXT-032 | Verify predictable exceptions       | High     | EXT-031    | NFR-002              | Engineering review complete | ☑      |
 
 ---
 
@@ -570,9 +570,9 @@ Upon completion of this phase the repository shall contain:
 | ------- | ---------------------------------------- | -------- | ---------- | -------------------- | ------------------------- | ------ |
 | EXT-033 | Define provider log format               | Medium   | EXT-032    | NFR-012              | Format documented         | ☐      |
 | EXT-034 | Log outbound requests                    | Medium   | EXT-033    | NFR-012              | Logs verified             | ☐      |
-| EXT-035 | Log provider failures                    | High     | EXT-034    | NFR-012              | Logs verified             | ☐      |
+| EXT-035 | Log provider failures                    | High     | EXT-034    | NFR-012              | Logs verified             | ☑      |
 | EXT-036 | Log response duration                    | Medium   | EXT-034    | NFR-012              | Logs verified             | ☐      |
-| EXT-037 | Verify sensitive information is excluded | Critical | EXT-036    | NFR-014              | Security review completed | ☐      |
+| EXT-037 | Verify sensitive information is excluded | Critical | EXT-036    | NFR-014              | Security review completed | ☑      |
 
 ---
 
@@ -580,12 +580,12 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                               | Priority | Depends On | Related Requirements | Verification      | Status |
 | ------- | ---------------------------------- | -------- | ---------- | -------------------- | ----------------- | ------ |
-| EXT-038 | Write provider client specs        | Critical | EXT-037    | NFR-011              | Specs pass        | ☐      |
-| EXT-039 | Test successful provider responses | High     | EXT-038    | NFR-011              | Specs pass        | ☐      |
-| EXT-040 | Test timeout scenarios             | Critical | EXT-039    | FR-007               | Specs pass        | ☐      |
-| EXT-041 | Test malformed responses           | High     | EXT-040    | FR-007               | Specs pass        | ☐      |
-| EXT-042 | Test retry behaviour               | High     | EXT-041    | FR-007               | Specs pass        | ☐      |
-| EXT-043 | Review provider test coverage      | High     | EXT-042    | NFR-011              | Coverage verified | ☐      |
+| EXT-038 | Write provider client specs        | Critical | EXT-037    | NFR-011              | Specs pass        | ☑      |
+| EXT-039 | Test successful provider responses | High     | EXT-038    | NFR-011              | Specs pass        | ☑      |
+| EXT-040 | Test timeout scenarios             | Critical | EXT-039    | FR-007               | Specs pass        | ☑      |
+| EXT-041 | Test malformed responses           | High     | EXT-040    | FR-007               | Specs pass        | ☑      |
+| EXT-042 | Test retry behaviour               | High     | EXT-041    | FR-007               | Specs pass        | ☑      |
+| EXT-043 | Review provider test coverage      | High     | EXT-042    | NFR-011              | Coverage verified | ☑      |
 
 ---
 
@@ -593,10 +593,10 @@ Upon completion of this phase the repository shall contain:
 
 | ID      | Task                               | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ---------------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| EXT-044 | Update ARCHITECTURE.md             | High     | EXT-043    | NFR-015              | Documentation reviewed      | ☐      |
+| EXT-044 | Update ARCHITECTURE.md             | High     | EXT-043    | NFR-015              | Documentation reviewed      | ☑      |
 | EXT-045 | Update API.md (provider behaviour) | Medium   | EXT-044    | NFR-015              | Documentation reviewed      | ☐      |
 | EXT-046 | Record integration decisions       | High     | EXT-045    | NFR-015              | Engineering Journal updated | ☐      |
-| EXT-047 | Update Junior Developer Guide      | Medium   | EXT-046    | NFR-015              | Documentation reviewed      | ☐      |
+| EXT-047 | Update Junior Developer Guide      | Medium   | EXT-046    | NFR-015              | Documentation reviewed      | ☑      |
 
 ---
 
@@ -651,16 +651,16 @@ Upon completion of this phase the repository shall contain:
 
 | Verification                   | Status |
 | ------------------------------ | ------ |
-| Provider client implemented    | ☐      |
-| HTTP configuration complete    | ☐      |
-| Authentication verified        | ☐      |
-| Response validation complete   | ☐      |
-| Retry strategy verified        | ☐      |
-| Timeout strategy verified      | ☐      |
-| Exception translation complete | ☐      |
+| Provider client implemented    | ☑      |
+| HTTP configuration complete    | ☑      |
+| Authentication verified        | ☑      |
+| Response validation complete   | ☑      |
+| Retry strategy verified        | ☑      |
+| Timeout strategy verified      | ☑      |
+| Exception translation complete | ☑      |
 | Structured logging verified    | ☐      |
-| Provider test suite passing    | ☐      |
-| Documentation synchronized     | ☐      |
+| Provider test suite passing    | ☑      |
+| Documentation synchronized     | ☑      |
 | RTM updated                    | ☐      |
 | Repository committed           | ☐      |
 

@@ -101,8 +101,8 @@ Only major implementation milestones shall be tracked here.
 | Phase                                   | Planned | In Progress | Complete |
 | --------------------------------------- | :-----: | :---------: | :------: |
 | Phase 1 – Repository Foundation         |    ☑    |      ☐      |    ☑     |
-| Phase 2 – Domain Design                 |    ☑    |      ☑      |    ☐     |
-| Phase 3 – External Provider Integration |    ☑    |      ☐      |    ☐     |
+| Phase 2 – Domain Design                 |    ☑    |      ☐      |    ☑     |
+| Phase 3 – External Provider Integration |    ☑    |      ☑      |    ☐     |
 | Phase 4 – Business Services             |    ☑    |      ☐      |    ☐     |
 | Phase 5 – Background Processing         |    ☑    |      ☐      |    ☐     |
 | Phase 6 – REST API                      |    ☑    |      ☐      |    ☐     |
@@ -148,12 +148,12 @@ Only major implementation milestones shall be tracked here.
 
 ## External Provider
 
-- ☐ CoinGecko Client
-- ☐ API Authentication
-- ☐ Timeout Handling
-- ☐ Retry Strategy
-- ☐ Response Validation
-- ☐ Exception Translation
+- ☑ CoinGecko Client
+- ☑ API Authentication
+- ☑ Timeout Handling
+- ☑ Retry Strategy
+- ☑ Response Validation
+- ☑ Exception Translation
 
 ---
 
@@ -193,7 +193,7 @@ Only major implementation milestones shall be tracked here.
 - ☑ Model Specs
 - ☑ Repository Specs
 - ☑ Cache Specs
-- ☐ Provider Specs
+- ☑ Provider Specs
 - ☐ Service Specs
 - ☐ Job Specs
 - ☐ Request Specs
@@ -318,7 +318,7 @@ Every implementation phase shall satisfy the following quality gates before it i
 
 ```text
 Phase:
-Phase 2 — Domain Design
+Phase 3 — External Provider Integration
 ```
 
 ---
@@ -327,7 +327,7 @@ Phase 2 — Domain Design
 
 ```text
 Work Package:
-GitHub Issue #7 — CryptoPriceRepository and PriceCache boundaries
+GitHub Issue #8 — CoinGecko client with safe configuration and deterministic failure handling
 ```
 
 ---
@@ -336,7 +336,7 @@ GitHub Issue #7 — CryptoPriceRepository and PriceCache boundaries
 
 ```text
 Task ID:
-DOM-021 through DOM-032, DOM-041, DOM-042, DOM-044, DOM-046
+EXT-001 through EXT-010, EXT-012, EXT-014 through EXT-017, EXT-019 through EXT-032, EXT-035, EXT-037 through EXT-044, EXT-047
 ```
 
 ---
@@ -345,7 +345,7 @@ DOM-021 through DOM-032, DOM-041, DOM-042, DOM-044, DOM-046
 
 ```text
 Describe the objective of the current implementation session.
-Implement the repository and cache abstractions without introducing Redis, provider integration, background jobs, controllers, services, or database schema changes.
+Implement an isolated CoinGecko provider client with Faraday, environment-driven API-key configuration, supported symbol mapping, response validation, bounded retries, controlled provider exceptions, and deterministic specs without introducing services, jobs, controllers, routes, cache writes, or persistence.
 ```
 
 ---
@@ -362,7 +362,7 @@ None
 
 ```text
 Task ID:
-Phase 2 review / next approved issue
+Phase 3 review / next approved issue
 ```
 
 ---
@@ -371,13 +371,13 @@ Phase 2 review / next approved issue
 
 ```text
 Completed:
-CryptoPriceRepository, PriceCache, repository specs, cache specs, architecture/testing documentation, and Phase 2 tracking updates.
+CoinGeckoClient, provider error boundary, provider specs, Faraday dependency, fixture-backed success payload, architecture/testing/junior-guide documentation, and Phase 3 tracking updates.
 
 Pending:
-Final review and any separately approved Phase 2 documentation tasks outside Issue #7 scope.
+Review and any separately approved Phase 3 work outside Issue #8 scope.
 
 Notes:
-No schema changes were made; DATABASE.md was intentionally left unchanged.
+No refresh service, background job, API controller/route, repository/cache use, persistence, or live HTTP test dependency was introduced.
 ```
 
 ---
