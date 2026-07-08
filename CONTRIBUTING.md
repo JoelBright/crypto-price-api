@@ -127,20 +127,17 @@ flowchart TD
 
 # 4. Development Setup
 
-> The commands in this section are target implementation commands. They become executable only after the relevant foundation tasks create Rails, Docker, environment, dependency, and test tooling files. Documentation-only changes should use Markdown validation and Git diff checks instead.
-
 ## Prerequisites
 
-After the application foundation exists, you need:
+Before contributing, you need:
 
 - Git
-- Ruby version defined in `.ruby-version`
-- Bundler
-- PostgreSQL
+- Docker and Docker Compose (recommended for local development)
+- Ruby version defined in `.ruby-version` and Bundler (for host-based development)
 - A valid local `.env` file copied from `.env.example`
 - A CoinGecko API key only when a later provider-integration issue requires manual verification
 
-## Initial Setup
+## Initial Setup (Docker — Recommended)
 
 Clone the repository:
 
@@ -159,14 +156,48 @@ Update `.env` with valid local values.
 
 Do not commit `.env`.
 
-Install dependencies and prepare the database:
+Build and start the application:
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+Prepare the database:
+
+```bash
+docker compose exec web bin/rails db:prepare
+```
+
+Run the test suite:
+
+```bash
+docker compose exec web bundle exec rspec
+```
+
+Run static analysis and security checks:
+
+```bash
+docker compose exec web bundle exec rubocop
+docker compose exec web bundle exec brakeman
+```
+
+Stop services when done:
+
+```bash
+docker compose down
+```
+
+## Initial Setup (Host-based — Alternative)
+
+Clone the repository and set up environment variables as described above, then:
 
 ```bash
 bundle install
 bin/rails db:prepare
 ```
 
-Run the Rails foundation locally:
+Run the application:
 
 ```bash
 bin/rails server
@@ -184,8 +215,6 @@ Run static analysis and security checks:
 bundle exec rubocop
 bundle exec brakeman
 ```
-
-Docker commands must not be documented as current setup commands until Docker support is implemented in its own issue.
 
 An implementation contribution should not be marked complete until the relevant project quality checks exist and pass. For documentation-only work, run available Markdown checks and Git diff validation instead.
 

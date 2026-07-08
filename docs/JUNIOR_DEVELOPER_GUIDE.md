@@ -139,16 +139,16 @@ By completing this guide, you should understand:
 
 Install the following before starting.
 
-| Tool                            | Purpose                             |
-| ------------------------------- | ----------------------------------- |
-| Git                             | Source control.                     |
-| Ruby                            | Application runtime.                |
-| Bundler                         | Ruby dependency management.         |
-| PostgreSQL                      | Durable application database.       |
-| Docker Desktop or Docker Engine | Reproducible local environment.     |
-| Docker Compose                  | Runs application services together. |
-| A Git hosting account           | Remote repository and CI.           |
-| curl                            | Local API verification.             |
+| Tool                            | Purpose                                           |
+| ------------------------------- | ------------------------------------------------- |
+| Git                             | Source control.                                   |
+| Ruby                            | Application runtime.                              |
+| Bundler                         | Ruby dependency management.                       |
+| PostgreSQL                      | Durable application database.                     |
+| Docker Desktop or Docker Engine | Reproducible local environment (implemented).     |
+| Docker Compose                  | Runs application services together (implemented). |
+| A Git hosting account           | Remote repository and CI.                         |
+| curl                            | Local API verification.                           |
 
 ---
 
@@ -788,7 +788,10 @@ Add the following dependencies to the `Gemfile`.
 
 ```ruby
 gem "faraday"
-# Add cache, queue, and scheduler gems only after those decisions are accepted.
+# Docker Compose may conflict with host services on standard ports.
+# The docker-compose.yml uses port 5433 (PostgreSQL) and 3001 (Rails)
+# to avoid collisions when those services run on the host.
+# Inside the Docker network, services communicate on the default ports (5432, 3000).
 gem "dotenv-rails", groups: [:development, :test]
 
 group :development, :test do
@@ -857,7 +860,7 @@ git commit -m "chore: add application and quality dependencies"
 
 ## Goal
 
-Run the web API, PostgreSQL, and any accepted cache, queue, worker, or scheduler services through Docker Compose after those infrastructure decisions are approved.
+Run the web API and PostgreSQL through Docker Compose. Worker, scheduler, cache, and queue services remain deferred until their implementation phase.
 
 ---
 
@@ -867,26 +870,18 @@ The application has multiple processes:
 
 - Rails web server.
 - PostgreSQL.
-- Accepted cache or queue backend, if selected.
-- Accepted background worker, if selected.
-- Accepted scheduler, if selected.
 
 Docker Compose makes these dependencies explicit and reproducible.
 
 ```mermaid
 flowchart LR
     Web[web<br/>Rails API]
-    Worker[worker<br/>Accepted Adapter]
-    Scheduler[scheduler<br/>Recurring Jobs]
     Database[(db<br/>PostgreSQL)]
-    CacheQueue[(accepted cache/queue backend)]
 
     Web --> Database
-    Web --> CacheQueue
-    Worker --> Database
-    Worker --> CacheQueue
-    Scheduler --> CacheQueue
 ```
+
+Worker, scheduler, and cache or queue backend services will be added during their respective implementation phases.
 
 ---
 
@@ -895,39 +890,30 @@ flowchart LR
 Create `Dockerfile`:
 
 ```dockerfile
-FROM ruby:3.4.4-slim
+FROM ruby:3.4.4-slim-bookworm
 
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-      build-essential \
-      libpq-dev \
-      postgresql-client \
-      curl && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update -qq \
+  && apt-get install --no-install-recommends -y \
+    build-essential \
+    libpq-dev \
+    curl \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle config set path /usr/local/bundle && \
-    bundle install
+RUN bundle install --jobs 4 --retry 3
 
 COPY . .
 
-RUN useradd --create-home appuser && \
-    chown -R appuser:appuser /app
-
-USER appuser
-
 EXPOSE 3000
 
-CMD ["bin/rails", "server", "-b", "0.0.0.0"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
 ```
 
-### Why This Dockerfile Uses a Non-Root User
+### Why This Dockerfile Keeps the Build Simple
 
-Running application containers as a non-root user reduces avoidable security risk.
-
-The project does not need root privileges at runtime.
+The Dockerfile uses a single-stage build with `ruby:3.4-slim-bookworm`. Build tools are installed and cleaned up in the same layer to keep the image lean. The `Gemfile.lock` is copied before the full application code to leverage Docker layer caching — dependency installation is only re-run when the lock file changes.
 
 ---
 
@@ -938,7 +924,7 @@ Create `docker-compose.yml`:
 ```yaml
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:17-bookworm
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -948,49 +934,47 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        ["CMD-SHELL", "pg_isready -U postgres -d crypto_price_api_development"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
 
   web:
     build: .
     command: >
-      sh -c "bin/rails db:prepare &&
-             bin/rails server -b 0.0.0.0"
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
-      # Add cache or queue backend URLs only after those decisions are accepted.
+      sh -c "bundle exec rails db:prepare && bundle exec puma -C config/puma.rb"
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - bundle_cache:/usr/local/bundle
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
+      TEST_DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_test
+      RAILS_MAX_THREADS: 5
+      RAILS_LOG_LEVEL: debug
     depends_on:
       db:
         condition: service_healthy
-
-  # Add worker, scheduler, and cache/queue backend services only after those decisions are accepted.
+    volumes:
+      - .:/app
 
 volumes:
   postgres_data:
-  bundle_cache:
 ```
 
-The scheduler configuration must be added only after the scheduler and worker-process decisions are accepted and recorded.
+### Why No Worker, Scheduler, or Cache Backend Services?
+
+Redis, Sidekiq, Solid Queue, and any other supporting services are deferred until their implementation phase. The issue that introduces worker or scheduler infrastructure will add the relevant Docker service, configuration, and documentation at that time.
 
 ---
 
 ## Build and Start Services
 
 ```bash
-docker compose up --build
+docker compose build
+docker compose up -d
 ```
 
-In another terminal, verify the containers:
+Verify the containers:
 
 ```bash
 docker compose ps
@@ -1000,15 +984,14 @@ Expected result:
 
 - `db` is healthy.
 - `web` is running.
-- Accepted supporting services are healthy, if configured.
 
 ---
 
 ## Verify Rails Inside Docker
 
 ```bash
-docker compose exec web bin/rails about
 docker compose exec web bin/rails db:prepare
+docker compose exec web bin/rails about
 ```
 
 Verify the web process responds:
@@ -1017,7 +1000,17 @@ Verify the web process responds:
 curl --include http://localhost:3000/up
 ```
 
-A Rails health endpoint should return a successful response once the generated application is running.
+The Rails health endpoint should return a successful response.
+
+---
+
+## Run Tests and Quality Checks
+
+```bash
+docker compose exec web bundle exec rspec
+docker compose exec web bundle exec rubocop
+docker compose exec web bundle exec brakeman
+```
 
 ---
 
@@ -1030,18 +1023,16 @@ docker compose down
 To remove persistent local database data:
 
 ```bash
-docker compose down --volumes
+docker compose down -v
 ```
-
-Use the second command carefully because it deletes the local PostgreSQL volume.
 
 ---
 
 ## Commit Docker Foundation
 
 ```bash
-git add Dockerfile docker-compose.yml
-git commit -m "chore: add Docker development environment"
+git add Dockerfile docker-compose.yml .dockerignore
+git commit -m "chore: add Docker and CI foundation"
 ```
 
 ---

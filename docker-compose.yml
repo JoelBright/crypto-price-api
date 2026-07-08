@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crypto_price_api_development
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: >
+      sh -c "bundle exec rails db:prepare && bundle exec puma -C config/puma.rb"
+    ports:
+      - "3001:3000"
+    environment:
+      RAILS_ENV: development
+      # DATABASE_URL connects via the internal Docker network (service name 'db').
+      # Host port mapping (5433:5432, 3001:3000) avoids collisions with local
+      # PostgreSQL or Rails instances running on the host.
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_development
+      TEST_DATABASE_URL: postgresql://postgres:postgres@db:5432/crypto_price_api_test
+      RAILS_MAX_THREADS: 5
+      RAILS_LOG_LEVEL: debug
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
