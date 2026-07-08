@@ -200,6 +200,22 @@ Establish a production-ready engineering environment before any business functio
 
 ---
 
+## Repository Governance
+
+| ID      | Task                                        | Priority | Depends On | Related Requirements | Verification                     | Status |
+| ------- | ------------------------------------------- | -------- | ---------- | -------------------- | -------------------------------- | ------ |
+| GOV-001 | Add issue templates                         | High     | FND-040    | NFR-015              | Templates created                | ☐      |
+| GOV-002 | Configure Dependabot                        | High     | FND-040    | NFR-015              | dependabot.yml validated         | ☐      |
+| GOV-003 | Create CODEOWNERS                           | Medium   | FND-040    | NFR-015              | CODEOWNERS file created          | ☐      |
+| GOV-004 | Document branch protection rules            | High     | GOV-003    | NFR-015              | CONTRIBUTING.md updated          | ☐      |
+| GOV-005 | Document required status checks             | High     | GOV-004    | NFR-015              | CONTRIBUTING.md updated          | ☐      |
+| GOV-006 | Update pull request template                | Medium   | GOV-005    | NFR-015              | Template reviewed                | ☐      |
+| GOV-007 | Update README.md governance references      | Medium   | GOV-006    | NFR-015              | README.md reviewed               | ☐      |
+| GOV-008 | Update FEATURE_CHECKLIST.md                 | Medium   | GOV-007    | NFR-015              | Governance items tracked         | ☐      |
+| GOV-009 | Update RELEASE_CHECKLIST.md                 | Medium   | GOV-008    | NFR-015              | Governance verification added    | ☐      |
+
+---
+
 # Phase 1 Exit Checklist
 
 The Repository Foundation phase shall not be considered complete until every task below has been completed.

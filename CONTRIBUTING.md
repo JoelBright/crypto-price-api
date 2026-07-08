@@ -291,7 +291,79 @@ Use one of the following prefixes.
 
 ---
 
-# 7. Contribution Workflow
+# 7. Repository Governance
+
+Repository governance settings are defined in this section. These settings are documented here because they require GitHub UI configuration and cannot be enforced solely through repository files.
+
+## Branch Protection Rules
+
+The `main` branch shall be protected with the following settings in the GitHub repository settings (Settings → Branches → Add branch protection rule):
+
+| Setting                                    | Value          |
+| ------------------------------------------ | -------------- |
+| Branch name pattern                        | `main`         |
+| Require pull request before merging        | Enabled        |
+| Require approvals                          | 1              |
+| Dismiss stale pull request approvals       | Enabled        |
+| Require review from Code Owners            | Enabled        |
+| Require status checks before merging       | Enabled        |
+| Required status checks                     | `quality` CI workflow (RSpec, RuboCop, Brakeman) |
+| Require branches to be up to date          | Enabled        |
+| Require conversation resolution            | Enabled        |
+| Do not allow bypassing the above settings  | Enabled        |
+| Automatically delete head branches         | Enabled        |
+| Allow force pushes                         | Disabled       |
+| Allow deletions                            | Disabled       |
+
+### Applying Branch Protection
+
+Branch protection is applied through the GitHub web interface. The settings listed above are the target configuration for this repository. Verify them after any repository migration or setting change.
+
+## Required Status Checks
+
+Before a pull request may be merged into `main`, the following GitHub Actions checks must pass:
+
+- **RSpec** — Full test suite (`bundle exec rspec`)
+- **RuboCop** — Ruby static analysis (`bundle exec rubocop`)
+- **Brakeman** — Security scanning (`bundle exec brakeman`)
+
+These checks are defined in `.github/workflows/ci.yml` and are enforced by the branch protection rule above.
+
+## Dependabot Configuration
+
+Dependabot is configured in `.github/dependabot.yml` for automatic dependency updates.
+
+| Package Ecosystem | Schedule | Limit           |
+| ----------------- | -------- | --------------- |
+| Bundler (Ruby)    | Weekly   | 5 open PRs      |
+| GitHub Actions    | Weekly   | 3 open PRs      |
+
+Dependabot pull requests shall be reviewed like any other contribution. They must pass all quality gates before merging.
+
+## Repository Settings Documentation
+
+The following governance files are maintained in the repository:
+
+| File                                         | Purpose                                       |
+| -------------------------------------------- | --------------------------------------------- |
+| `.github/pull_request_template.md`           | Standard pull request description template    |
+| `.github/ISSUE_TEMPLATE/bug_report.md`       | Bug report template                           |
+| `.github/ISSUE_TEMPLATE/feature_request.md`  | Feature request template                      |
+| `.github/ISSUE_TEMPLATE/config.yml`          | Issue template configuration                  |
+| `.github/dependabot.yml`                     | Automated dependency update configuration     |
+| `CODEOWNERS`                                 | Code owner assignments for PR review routing  |
+
+## Governance Change Workflow
+
+Changes to repository governance settings follow the same contribution workflow defined in Section 8.
+
+Governance changes that can be committed to the repository (templates, configuration) follow the standard branch-and-PR process.
+
+Governance changes that require GitHub UI configuration (branch protection) should be documented in the pull request summary and verified after merge.
+
+---
+
+# 8. Contribution Workflow
 
 Every contribution follows the same lifecycle.
 
@@ -359,7 +431,7 @@ Perform a self-review before opening a pull request.
 
 ---
 
-# 8. Code Standards
+# 9. Code Standards
 
 ## General Standards
 
@@ -424,7 +496,7 @@ Every production class must have:
 
 ---
 
-# 9. Architecture Boundaries
+# 10. Architecture Boundaries
 
 The following dependency direction must be preserved.
 
@@ -509,7 +581,7 @@ Jobs must not:
 
 ---
 
-# 10. Testing Requirements
+# 11. Testing Requirements
 
 Every contribution that changes behaviour must include appropriate automated tests.
 
@@ -561,7 +633,7 @@ docker compose run --rm web bundle exec rspec
 
 ---
 
-# 11. Documentation Requirements
+# 12. Documentation Requirements
 
 Documentation is part of the implementation.
 
@@ -595,7 +667,7 @@ Do not duplicate the same content across multiple documents. Update the document
 
 ---
 
-# 12. Configuration and Secret Management
+# 13. Configuration and Secret Management
 
 ## Secret Rules
 
@@ -638,7 +710,7 @@ When adding a new environment variable:
 
 ---
 
-# 13. Git Commit Standards
+# 14. Git Commit Standards
 
 Commits should communicate one logical, reviewable, verifiable change.
 
@@ -680,7 +752,7 @@ final
 
 ---
 
-# 14. Pull Request Standards
+# 15. Pull Request Standards
 
 A pull request should contain one coherent change set.
 
@@ -736,7 +808,7 @@ Split unrelated work into separate pull requests or commits.
 
 ---
 
-# 15. Review Expectations
+# 16. Review Expectations
 
 Code review is a quality activity, not a formality.
 
@@ -799,7 +871,7 @@ flowchart TD
 
 ---
 
-# 16. Quality Gates
+# 17. Quality Gates
 
 Every contribution must satisfy these checks before merge.
 
@@ -842,7 +914,7 @@ A contributor must not mark work complete if any required quality gate fails.
 
 ---
 
-# 17. Reporting Defects
+# 18. Reporting Defects
 
 A defect report should describe reproducible behaviour, not only a general impression.
 
@@ -889,7 +961,7 @@ Every corrected production defect requires an automated regression test unless t
 
 ---
 
-# 18. Proposing Enhancements
+# 19. Proposing Enhancements
 
 Version 1.0 has intentionally limited scope.
 
@@ -943,7 +1015,7 @@ The enhancement must solve a documented requirement, reliability concern, securi
 
 ---
 
-# 19. Updating Dependencies
+# 20. Updating Dependencies
 
 Dependency updates can change security posture, runtime behaviour, and CI compatibility.
 
@@ -980,7 +1052,7 @@ flowchart TD
 
 ---
 
-# 20. Release Contributions
+# 21. Release Contributions
 
 Release-related changes require additional verification.
 
@@ -1011,7 +1083,7 @@ No new features should be introduced during release certification.
 
 ---
 
-# 21. Contributor Checklist
+# 22. Contributor Checklist
 
 Use this checklist before opening a pull request.
 
@@ -1060,7 +1132,7 @@ Use this checklist before opening a pull request.
 
 ---
 
-# 22. Related Documentation
+# 23. Related Documentation
 
 | Document                                                                                       | Relationship                                        |
 | ---------------------------------------------------------------------------------------------- | --------------------------------------------------- |
