@@ -277,6 +277,7 @@ Current implementation status:
 - `CryptoPriceRepository#find` is covered for normalized lookup, missing records, and composite-key matching.
 - `CryptoPriceRepository#upsert` is covered for create, update, persisted return values, and duplicate current-record prevention.
 - Repository boundary specs verify that the repository does not perform cache or logging orchestration.
+- Cross-layer integration specs verify repository persistence is visible through the public request path after refresh.
 
 ---
 
@@ -306,6 +307,7 @@ Current implementation status:
 - `PriceCache#delete` is covered for cache invalidation.
 - Cache miss behaviour returns `nil`.
 - Specs verify injected cache-store usage without Redis-specific APIs.
+- Service specs cover graceful cache-read, cache-repopulation, and cache-write failure handling.
 
 ---
 
@@ -373,6 +375,7 @@ Current implementation status:
 - `PriceQueryService` is implemented with cache-first, repository-fallback, cache-repopulation, and graceful cache-failure handling.
 - The service returns `PriceQueryService::Result` (a `Data.define` value object) with `found?` and `not_found?` predicates.
 - All critical scenarios are covered by service specs.
+- Integration specs verify persisted refresh data can be returned through the API request path.
 
 Target location:
 
@@ -400,6 +403,7 @@ Current implementation status:
 - `PriceRefreshService` is implemented with provider-first, persist-before-cache ordering, and graceful degradation.
 - The service returns `PriceRefreshService::Result` (a `Data.define` value object) with `success?` and `failure?` predicates, a `price_record`, and an `error` object.
 - All critical scenarios are covered by service specs.
+- Integration specs verify successful refresh-to-API visibility and provider-failure fallback from stored data.
 
 Target location:
 
@@ -427,6 +431,11 @@ Target location:
 ```text id="6jqzst"
 spec/jobs/price_refresh_job_spec.rb
 ```
+
+Current implementation status:
+
+- `PriceRefreshJob` specs cover enqueue behaviour, default queue selection, serializable arguments, default currency handling, service delegation, dependency construction, thin-boundary behaviour, controlled failure handling, retry handler registration, discard handler registration, discard execution, and duplicate execution delegation.
+- `spec/config/recurring_configuration_spec.rb` verifies Solid Queue recurring configuration without waiting for real elapsed scheduler time.
 
 ---
 
@@ -461,6 +470,7 @@ Current implementation status:
 - Request specs verify `invalid_symbol`, `unsupported_symbol`, `price_not_found`, and safe `internal_error` envelopes.
 - Request specs verify service delegation and cached-payload serialization through the `PriceQueryService` result boundary.
 - Request specs verify persisted-data fallback when the cache has no usable value.
+- Integration specs verify public API availability after refresh and after provider refresh failure with historical data.
 
 ---
 
@@ -481,6 +491,12 @@ Target location:
 ```text id="uukcfc"
 spec/integration/
 ```
+
+Current implementation status:
+
+- `spec/integration/price_refresh_to_api_spec.rb` verifies that a successful refresh persists provider data and a subsequent `GET /prices/:symbol` returns the refreshed value through the public API contract.
+- `spec/integration/provider_failure_fallback_spec.rb` verifies that a provider refresh failure preserves the last known stored value and the API continues returning that value.
+- Integration specs intentionally remain small and do not duplicate every unit, service, job, request, or provider-client edge case already covered at the owning boundary.
 
 Integration tests should remain focused. They are not a replacement for unit, service, job, or request specifications.
 
@@ -1025,9 +1041,7 @@ The following areas should approach complete meaningful coverage:
 
 ## Coverage Threshold Enforcement
 
-SimpleCov configuration enforces a provisional threshold during full-suite runs. Focused directory or file runs are used for fast local feedback and still generate coverage reports, but the aggregate threshold is enforced by `bundle exec rspec`.
-
-The threshold will be raised to 95% once domain code and meaningful specs exist.
+SimpleCov configuration enforces a 95% minimum line-coverage threshold during full-suite runs. Focused directory or file runs are used for fast local feedback and still generate coverage reports, but the aggregate threshold is enforced by `bundle exec rspec`.
 
 A coverage decrease requires:
 
