@@ -23,6 +23,9 @@ Rails.application.configure do
     config.action_controller.perform_caching = false
   end
 
+  # Use Solid Queue as the Active Job backend (accepted in ADR-017).
+  config.active_job.queue_adapter = :solid_queue
+
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 

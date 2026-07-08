@@ -250,19 +250,34 @@ The scheduler decision has been recorded and accepted in `ENGINEERING_JOURNAL.md
 
 ---
 
-## Scheduler Configuration Boundary
+## Scheduler Implementation
 
-```mermaid id="exi7ax"
-flowchart LR
-    Environment[Environment Configuration]
-    Schedule[Scheduler Configuration]
-    Job[PriceRefreshJob]
+The application uses **Solid Queue 1.4.0** with its built-in recurring scheduling (see ADR-017 in `ENGINEERING_JOURNAL.md`).
 
-    Environment --> Schedule
-    Schedule --> Job
-```
+### Configuration
 
-The schedule interval, enabled state, configured symbols, and quote currency must be externalized through configuration.
+- **`config/queue.yml`** — Solid Queue worker/dispatcher configuration.
+- **`config/recurring.yml`** — One-minute schedule for `PriceRefreshJob` (BTC and ETH).
+- **`config/environments/development.rb`** — `config.active_job.queue_adapter = :solid_queue`
+- **`config/environments/production.rb`** — `config.active_job.queue_adapter = :solid_queue`
+- **`config/environments/test.rb`** — `config.active_job.queue_adapter = :test`
+
+### Process Model
+
+Solid Queue's `bin/jobs` supervisor process manages workers, dispatchers, and the recurring-task scheduler in a single process. In Docker Compose this runs as the `jobs` service.
+
+### Verification
+
+- `bundle exec rails runner "PriceRefreshJob.perform_later(symbol: 'BTC', currency: 'USD')"` confirms enqueueing works.
+- `config/recurring.yml` is validated by `spec/config/recurring_configuration_spec.rb`.
+- No real one-minute wait is required for any test.
+
+### Schedule
+
+| Task | Schedule | Job | Arguments |
+|---|---|---|---|
+| `price_refresh_btc` | Every 1 minute | `PriceRefreshJob` | `{ symbol: "BTC", currency: "USD" }` |
+| `price_refresh_eth` | Every 1 minute | `PriceRefreshJob` | `{ symbol: "ETH", currency: "USD" }` |
 
 ---
 
@@ -348,24 +363,53 @@ The cache must not be updated before the database write succeeds.
 
 # 7. Job Contract
 
-## Intended Job Name
+## Job Name
 
-```ruby id="qv6n9e"
+```ruby
 PriceRefreshJob
 ```
 
-## Intended Invocation Shape
+## Invocation Shape
 
-The final implementation is expected to support an invocation equivalent to:
-
-```ruby id="c72e7t"
-PriceRefreshJob.perform_later(
-  symbol: "btc",
-  currency: "usd"
-)
+```ruby
+PriceRefreshJob.perform_later(symbol: "BTC", currency: "USD")
 ```
 
-The exact argument representation may change if the selected job adapter imposes a serialization constraint. Any change must preserve explicit, testable inputs.
+Jobs are enqueued via the recurring schedule defined in `config/recurring.yml`. The job accepts `symbol:` (required) and `currency:` (defaults to `"USD"`) as serializable keyword arguments.
+
+## Queue
+
+The job uses the `:default` queue (configured in `config/queue.yml` and `config/recurring.yml`).
+
+## Retry Behaviour
+
+| Error Class | Behaviour | Attempts | Wait |
+|---|---|---|---|
+| `ProviderError::TimeoutError` | Retry | 3 | 5 seconds linear |
+| `ProviderError::NetworkError` | Retry | 3 | 5 seconds linear |
+| `ProviderError::HttpError` | Retry | 3 | 5 seconds linear |
+| `ProviderError::ConfigurationError` | Discard | 1 | — |
+| `ProviderError::UnsupportedSymbolError` | Discard | 1 | — |
+
+Retryable errors are bounded. After exhausting retries the exception propagates and the job is marked as failed. Discarded errors are silently swallowed — the next scheduled execution will attempt again.
+
+## Scheduling
+
+The `config/recurring.yml` file defines two recurring tasks (one per symbol) that enqueue `PriceRefreshJob` every minute:
+
+```yaml
+price_refresh_btc:
+  class: PriceRefreshJob
+  queue: default
+  args: [ { symbol: "BTC", currency: "USD" } ]
+  schedule: every minute
+
+price_refresh_eth:
+  class: PriceRefreshJob
+  queue: default
+  args: [ { symbol: "ETH", currency: "USD" } ]
+  schedule: every minute
+```
 
 ---
 

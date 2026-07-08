@@ -1,0 +1,29 @@
+# Recurring tasks for Solid Queue scheduler.
+# Loaded by config/queue.yml via SolidQueue::Configuration.
+# The scheduler enqueues one PriceRefreshJob per configured symbol every minute.
+# One job per symbol keeps failures and retries isolated (see docs/BACKGROUND_JOBS.md).
+
+default: &default
+  price_refresh_btc:
+    class: PriceRefreshJob
+    queue: default
+    args: [ { symbol: "BTC", currency: "USD" } ]
+    schedule: every minute
+    description: "Refresh latest BTC/USD price from CoinGecko"
+
+  price_refresh_eth:
+    class: PriceRefreshJob
+    queue: default
+    args: [ { symbol: "ETH", currency: "USD" } ]
+    schedule: every minute
+    description: "Refresh latest ETH/USD price from CoinGecko"
+
+development:
+  <<: *default
+
+production:
+  <<: *default
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+    description: "Remove completed job records to keep the queue table lean"
