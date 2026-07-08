@@ -1050,7 +1050,9 @@ git commit -m "chore: add Docker development environment"
 
 ## Goal
 
-Replace default Rails testing with RSpec, configure coverage, configure linting, and configure security scanning.
+Replace default Rails testing with RSpec, configure coverage, configure linting, configure security scanning, and configure FactoryBot.
+
+> **Foundation Note:** In the released repository, RSpec, SimpleCov, RuboCop, Brakeman, and FactoryBot are already configured by Issue #3. This chapter documents the commands for a fresh reconstruction from scratch.
 
 ---
 

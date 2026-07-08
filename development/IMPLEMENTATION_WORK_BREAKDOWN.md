@@ -155,10 +155,10 @@ Establish a production-ready engineering environment before any business functio
 | ID      | Task                 | Priority | Depends On | Related Requirements | Verification               | Status |
 | ------- | -------------------- | -------- | ---------- | -------------------- | -------------------------- | ------ |
 | FND-019 | Configure RSpec      | Critical | FND-006    | NFR-011              | Sample spec passes         | ☑      |
-| FND-020 | Configure RuboCop    | High     | FND-019    | NFR-009              | Lint passes                | ☐      |
-| FND-021 | Configure Brakeman   | High     | FND-019    | NFR-010              | Security scan passes       | ☐      |
-| FND-022 | Configure SimpleCov  | High     | FND-019    | NFR-011              | Coverage report generated  | ☐      |
-| FND-023 | Configure FactoryBot | Medium   | FND-019    | NFR-011              | Factory loads successfully | ☐      |
+| FND-020 | Configure RuboCop    | High     | FND-019    | NFR-009              | Lint passes                | ☑      |
+| FND-021 | Configure Brakeman   | High     | FND-019    | NFR-010              | Security scan passes       | ☑      |
+| FND-022 | Configure SimpleCov  | High     | FND-019    | NFR-011              | Coverage report generated  | ☑      |
+| FND-023 | Configure FactoryBot | Medium   | FND-019    | NFR-011              | Factory loads successfully | ☑      |
 | FND-024 | Configure Faker      | Low      | FND-023    | NFR-011              | Sample data generated      | ☐      |
 
 ---

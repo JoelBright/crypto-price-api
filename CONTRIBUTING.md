@@ -797,10 +797,9 @@ flowchart LR
 ## Required Commands
 
 ```bash
-docker compose run --rm web bundle exec rspec
-docker compose run --rm web bundle exec rubocop
-docker compose run --rm web bundle exec brakeman
-docker compose build
+bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
 ```
 
 Run additional checks when relevant:
