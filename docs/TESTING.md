@@ -454,6 +454,14 @@ Target location:
 spec/requests/prices_spec.rb
 ```
 
+Current implementation status:
+
+- `spec/requests/prices_spec.rb` covers successful `GET /prices/:symbol` responses.
+- Request specs verify lowercase public response serialization for uppercase internal values.
+- Request specs verify `invalid_symbol`, `unsupported_symbol`, `price_not_found`, and safe `internal_error` envelopes.
+- Request specs verify service delegation and cached-payload serialization through the `PriceQueryService` result boundary.
+- Request specs verify persisted-data fallback when the cache has no usable value.
+
 ---
 
 ## Integration Specifications

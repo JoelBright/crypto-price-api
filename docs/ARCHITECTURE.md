@@ -200,6 +200,25 @@ Responsibilities:
 - Render consistent JSON error responses.
 - Map known application exceptions to appropriate HTTP status codes.
 
+Implementation location:
+
+```text
+app/controllers/prices_controller.rb
+```
+
+The REST API response boundary is implemented by:
+
+| Component                   | Responsibility                                                   |
+| --------------------------- | ---------------------------------------------------------------- |
+| `PriceResponseSerializer`   | Convert internal uppercase price data to the public JSON shape.  |
+| `ErrorResponseSerializer`   | Produce stable error envelopes without internal exception detail. |
+
+Serializer location:
+
+```text
+app/serializers/
+```
+
 The controller must not:
 
 - Call CoinGecko directly.

@@ -1275,11 +1275,11 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                                          | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | --------------------------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| API-001 | Define public endpoint contract               | Critical | JOB-034    | FR-001               | Contract reviewed            | ☐      |
-| API-002 | Review endpoint against project specification | Critical | API-001    | FR-001               | Review completed             | ☐      |
-| API-003 | Define request structure                      | High     | API-002    | FR-001               | Specification updated        | ☐      |
-| API-004 | Define response structure                     | High     | API-003    | FR-002               | Specification reviewed       | ☐      |
-| API-005 | Review API versioning strategy                | Medium   | API-004    | NFR-001              | Engineering review completed | ☐      |
+| API-001 | Define public endpoint contract               | Critical | JOB-034    | FR-001               | Contract reviewed            | ☑      |
+| API-002 | Review endpoint against project specification | Critical | API-001    | FR-001               | Review completed             | ☑      |
+| API-003 | Define request structure                      | High     | API-002    | FR-001               | Specification updated        | ☑      |
+| API-004 | Define response structure                     | High     | API-003    | FR-002               | Specification reviewed       | ☑      |
+| API-005 | Review API versioning strategy                | Medium   | API-004    | NFR-001              | Engineering review completed | ☑      |
 
 ---
 
@@ -1287,9 +1287,9 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                        | Priority | Depends On | Related Requirements | Verification       | Status |
 | ------- | --------------------------- | -------- | ---------- | -------------------- | ------------------ | ------ |
-| API-006 | Configure route definitions | Critical | API-005    | FR-001               | Routes verified    | ☐      |
-| API-007 | Verify route accessibility  | Critical | API-006    | FR-001               | Endpoint reachable | ☐      |
-| API-008 | Review routing conventions  | Medium   | API-007    | NFR-001              | Review completed   | ☐      |
+| API-006 | Configure route definitions | Critical | API-005    | FR-001               | Routes verified    | ☑      |
+| API-007 | Verify route accessibility  | Critical | API-006    | FR-001               | Endpoint reachable | ☑      |
+| API-008 | Review routing conventions  | Medium   | API-007    | NFR-001              | Review completed   | ☑      |
 
 ---
 
@@ -1297,10 +1297,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                                  | Priority | Depends On | Related Requirements | Verification                  | Status |
 | ------- | ------------------------------------- | -------- | ---------- | -------------------- | ----------------------------- | ------ |
-| API-009 | Create PricesController               | Critical | API-008    | FR-001               | Controller loads              | ☐      |
-| API-010 | Inject Query Service                  | Critical | API-009    | FR-002               | Integration verified          | ☐      |
-| API-011 | Remove business logic from controller | Critical | API-010    | NFR-002              | Code review completed         | ☐      |
-| API-012 | Review controller responsibilities    | High     | API-011    | NFR-002              | Architecture review completed | ☐      |
+| API-009 | Create PricesController               | Critical | API-008    | FR-001               | Controller loads              | ☑      |
+| API-010 | Inject Query Service                  | Critical | API-009    | FR-002               | Integration verified          | ☑      |
+| API-011 | Remove business logic from controller | Critical | API-010    | NFR-002              | Code review completed         | ☑      |
+| API-012 | Review controller responsibilities    | High     | API-011    | NFR-002              | Architecture review completed | ☑      |
 
 ---
 
@@ -1308,10 +1308,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                           | Priority | Depends On | Related Requirements | Verification        | Status |
 | ------- | ------------------------------ | -------- | ---------- | -------------------- | ------------------- | ------ |
-| API-013 | Validate cryptocurrency symbol | Critical | API-012    | FR-001               | Validation verified | ☐      |
-| API-014 | Handle unsupported symbols     | High     | API-013    | FR-009               | Behaviour verified  | ☐      |
-| API-015 | Validate malformed requests    | High     | API-014    | FR-009               | Specs pass          | ☐      |
-| API-016 | Review validation strategy     | Medium   | API-015    | NFR-002              | Review completed    | ☐      |
+| API-013 | Validate cryptocurrency symbol | Critical | API-012    | FR-001               | Validation verified | ☑      |
+| API-014 | Handle unsupported symbols     | High     | API-013    | FR-009               | Behaviour verified  | ☑      |
+| API-015 | Validate malformed requests    | High     | API-014    | FR-009               | Specs pass          | ☑      |
+| API-016 | Review validation strategy     | Medium   | API-015    | NFR-002              | Review completed    | ☑      |
 
 ---
 
@@ -1319,10 +1319,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                         | Priority | Depends On | Related Requirements | Verification       | Status |
 | ------- | ---------------------------- | -------- | ---------- | -------------------- | ------------------ | ------ |
-| API-017 | Design response serializer   | High     | API-016    | FR-002               | Design reviewed    | ☐      |
-| API-018 | Implement JSON serialization | Critical | API-017    | FR-002               | Responses verified | ☐      |
-| API-019 | Ensure response consistency  | High     | API-018    | FR-009               | Review completed   | ☐      |
-| API-020 | Verify timestamp formatting  | Medium   | API-019    | FR-002               | Specs pass         | ☐      |
+| API-017 | Design response serializer   | High     | API-016    | FR-002               | Design reviewed    | ☑      |
+| API-018 | Implement JSON serialization | Critical | API-017    | FR-002               | Responses verified | ☑      |
+| API-019 | Ensure response consistency  | High     | API-018    | FR-009               | Review completed   | ☑      |
+| API-020 | Verify timestamp formatting  | Medium   | API-019    | FR-002               | Specs pass         | ☑      |
 
 ---
 
@@ -1330,10 +1330,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                                     | Priority | Depends On | Related Requirements | Verification       | Status |
 | ------- | ---------------------------------------- | -------- | ---------- | -------------------- | ------------------ | ------ |
-| API-021 | Define error response format             | Critical | API-020    | FR-009               | Contract reviewed  | ☐      |
-| API-022 | Map service exceptions to HTTP responses | Critical | API-021    | FR-008               | Behaviour verified | ☐      |
-| API-023 | Implement consistent error serializer    | High     | API-022    | FR-009               | Specs pass         | ☐      |
-| API-024 | Verify predictable API failures          | High     | API-023    | FR-009               | Review completed   | ☐      |
+| API-021 | Define error response format             | Critical | API-020    | FR-009               | Contract reviewed  | ☑      |
+| API-022 | Map service exceptions to HTTP responses | Critical | API-021    | FR-008               | Behaviour verified | ☑      |
+| API-023 | Implement consistent error serializer    | High     | API-022    | FR-009               | Specs pass         | ☑      |
+| API-024 | Verify predictable API failures          | High     | API-023    | FR-009               | Review completed   | ☑      |
 
 ---
 
@@ -1341,10 +1341,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                          | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | ----------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| API-025 | Define success status codes   | High     | API-024    | FR-008               | Verified                     | ☐      |
-| API-026 | Define client error responses | High     | API-025    | FR-008               | Verified                     | ☐      |
-| API-027 | Define server error responses | Medium   | API-026    | FR-008               | Verified                     | ☐      |
-| API-028 | Review HTTP semantics         | Medium   | API-027    | NFR-001              | Engineering review completed | ☐      |
+| API-025 | Define success status codes   | High     | API-024    | FR-008               | Verified                     | ☑      |
+| API-026 | Define client error responses | High     | API-025    | FR-008               | Verified                     | ☑      |
+| API-027 | Define server error responses | Medium   | API-026    | FR-008               | Verified                     | ☑      |
+| API-028 | Review HTTP semantics         | Medium   | API-027    | NFR-001              | Engineering review completed | ☑      |
 
 ---
 
@@ -1352,12 +1352,12 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                              | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | --------------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| API-029 | Verify endpoint contract          | Critical | API-028    | FR-001               | Contract validated          | ☐      |
-| API-030 | Verify request schema             | Critical | API-029    | FR-001               | Request validation complete | ☐      |
-| API-031 | Verify response schema            | Critical | API-030    | FR-002               | Schema validated            | ☐      |
-| API-032 | Verify error schema               | Critical | API-031    | FR-009               | Error responses validated   | ☐      |
-| API-033 | Verify JSON consistency           | High     | API-032    | FR-009               | Response review completed   | ☐      |
-| API-034 | Verify API documentation accuracy | High     | API-033    | NFR-015              | Documentation reviewed      | ☐      |
+| API-029 | Verify endpoint contract          | Critical | API-028    | FR-001               | Contract validated          | ☑      |
+| API-030 | Verify request schema             | Critical | API-029    | FR-001               | Request validation complete | ☑      |
+| API-031 | Verify response schema            | Critical | API-030    | FR-002               | Schema validated            | ☑      |
+| API-032 | Verify error schema               | Critical | API-031    | FR-009               | Error responses validated   | ☑      |
+| API-033 | Verify JSON consistency           | High     | API-032    | FR-009               | Response review completed   | ☑      |
+| API-034 | Verify API documentation accuracy | High     | API-033    | NFR-015              | Documentation reviewed      | ☑      |
 
 ---
 
@@ -1365,11 +1365,11 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                             | Priority | Depends On | Related Requirements | Verification      | Status |
 | ------- | -------------------------------- | -------- | ---------- | -------------------- | ----------------- | ------ |
-| API-035 | Write request specifications     | Critical | API-034    | NFR-011              | Specs pass        | ☐      |
-| API-036 | Test successful responses        | Critical | API-035    | FR-002               | Specs pass        | ☐      |
-| API-037 | Test invalid symbols             | High     | API-036    | FR-009               | Specs pass        | ☐      |
-| API-038 | Test provider fallback behaviour | Critical | API-037    | FR-007               | Specs pass        | ☐      |
-| API-039 | Verify request coverage          | High     | API-038    | NFR-011              | Coverage verified | ☐      |
+| API-035 | Write request specifications     | Critical | API-034    | NFR-011              | Specs pass        | ☑      |
+| API-036 | Test successful responses        | Critical | API-035    | FR-002               | Specs pass        | ☑      |
+| API-037 | Test invalid symbols             | High     | API-036    | FR-009               | Specs pass        | ☑      |
+| API-038 | Test provider fallback behaviour | Critical | API-037    | FR-007               | Specs pass        | ☑      |
+| API-039 | Verify request coverage          | High     | API-038    | NFR-011              | Coverage verified | ☑      |
 
 ---
 
@@ -1377,10 +1377,10 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | ID      | Task                          | Priority | Depends On | Related Requirements | Verification                | Status |
 | ------- | ----------------------------- | -------- | ---------- | -------------------- | --------------------------- | ------ |
-| API-040 | Complete API.md               | Critical | API-039    | NFR-015              | Documentation reviewed      | ☐      |
-| API-041 | Update ARCHITECTURE.md        | Medium   | API-040    | NFR-015              | Documentation reviewed      | ☐      |
-| API-042 | Record API design decisions   | High     | API-041    | NFR-015              | Engineering Journal updated | ☐      |
-| API-043 | Update Junior Developer Guide | Medium   | API-042    | NFR-015              | Documentation reviewed      | ☐      |
+| API-040 | Complete API.md               | Critical | API-039    | NFR-015              | Documentation reviewed      | ☑      |
+| API-041 | Update ARCHITECTURE.md        | Medium   | API-040    | NFR-015              | Documentation reviewed      | ☑      |
+| API-042 | Record API design decisions   | High     | API-041    | NFR-015              | Engineering Journal updated | ☑      |
+| API-043 | Update Junior Developer Guide | Medium   | API-042    | NFR-015              | Documentation reviewed      | ☑      |
 
 ---
 
@@ -1426,15 +1426,15 @@ Each implementation stage shall be completed and verified before proceeding to t
 
 | Verification                    | Status |
 | ------------------------------- | ------ |
-| Routes implemented              | ☐      |
-| Controller implemented          | ☐      |
-| Request validation complete     | ☐      |
-| Response serialization complete | ☐      |
-| Error serialization complete    | ☐      |
-| HTTP status mapping verified    | ☐      |
-| API contract verified           | ☐      |
-| Request test suite passing      | ☐      |
-| Documentation synchronized      | ☐      |
+| Routes implemented              | ☑      |
+| Controller implemented          | ☑      |
+| Request validation complete     | ☑      |
+| Response serialization complete | ☑      |
+| Error serialization complete    | ☑      |
+| HTTP status mapping verified    | ☑      |
+| API contract verified           | ☑      |
+| Request test suite passing      | ☑      |
+| Documentation synchronized      | ☑      |
 | RTM updated                     | ☐      |
 | Repository committed            | ☐      |
 
