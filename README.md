@@ -2,7 +2,7 @@
 
 A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** Rails API foundation, Docker, CI, and repository governance complete; domain, provider, API endpoint, and background processing remain deferred
+> **Project Status:** Rails API foundation, Docker, CI, and repository governance complete; background infrastructure decision validated (Solid Queue with recurring scheduling); domain, provider, API endpoint remain deferred
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -135,7 +135,7 @@ The read path follows this order:
 
 ## Background Price Refresh
 
-The target design requires a scheduled background job to retrieve prices from CoinGecko every minute. The scheduler, queue adapter, worker process layout, and supporting infrastructure remain deferred until the background-processing implementation phase.
+The target design requires a scheduled background job (Solid Queue recurring task) to retrieve prices from CoinGecko every minute. The scheduler, queue adapter, and worker process layout have been validated (see ADR-017 in ENGINEERING_JOURNAL.md).
 
 A successful refresh performs the following actions:
 
@@ -299,8 +299,8 @@ sequenceDiagram
 | Language               | Ruby                                             | Primary application language.                                                      |
 | Framework              | Ruby on Rails API Mode                           | API framework, ActiveRecord, routing, configuration, and conventions.              |
 | Database               | PostgreSQL                                       | Durable storage for the latest known cryptocurrency prices.                        |
-| Background Processing  | Deferred                                         | No Sidekiq, Solid Queue, Redis, scheduler, worker, or queue adapter is configured. |
-| Scheduling             | Scheduler implementation selected during Phase 5 | Proposed implementation area; concrete scheduler decision is deferred.             |
+| Background Processing  | Solid Queue 1.4+ (Accepted)                 | Database-backed Active Job backend with built-in recurring scheduling.              |
+| Scheduling             | Solid Queue built-in recurring tasks             | One-minute refresh schedule managed by Solid Queue's recurring task scheduler.      |
 | HTTP Client            | Deferred                                         | CoinGecko provider integration belongs to a later issue.                           |
 | Cache                  | Rails Cache Store                                | Cache-first price retrieval.                                                       |
 | Test Framework         | RSpec                                            | Unit, service, request, repository, client, and job testing.                       |

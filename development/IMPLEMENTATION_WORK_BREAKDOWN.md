@@ -1052,7 +1052,7 @@ Business logic shall never be introduced into the background job.
 
 | ID      | Task                          | Priority | Depends On | Related Requirements | Verification                 | Status |
 | ------- | ----------------------------- | -------- | ---------- | -------------------- | ---------------------------- | ------ |
-| JOB-009 | Select scheduling mechanism   | High     | JOB-008    | FR-004               | Decision documented          | ☐      |
+| JOB-009 | Select scheduling mechanism   | High     | JOB-008    | FR-004               | Decision documented          | ☑      |
 | JOB-010 | Configure one-minute schedule | Critical | JOB-009    | FR-004               | Scheduler verified           | ☐      |
 | JOB-011 | Verify scheduled execution    | Critical | JOB-010    | FR-004               | Execution observed           | ☐      |
 | JOB-012 | Validate repeated execution   | High     | JOB-011    | FR-004               | Multiple executions verified | ☐      |
