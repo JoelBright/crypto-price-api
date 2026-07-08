@@ -50,10 +50,6 @@ class PriceRefreshJob < ApplicationJob
   private
 
   def build_service
-    PriceRefreshService.new(
-      provider_client: CoinGeckoClient.new,
-      repository: CryptoPriceRepository.new,
-      cache: PriceCache.new
-    )
+    Services.price_refresh
   end
 end

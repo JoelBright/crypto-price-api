@@ -21,10 +21,7 @@ class PricesController < ApplicationController
   end
 
   def price_query_service
-    @price_query_service ||= PriceQueryService.new(
-      repository: CryptoPriceRepository.new,
-      cache: PriceCache.new
-    )
+    @price_query_service ||= Services.price_query
   end
 
   def normalize_symbol(symbol)
