@@ -2,7 +2,7 @@
 
 A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** Rails API foundation implemented; domain, provider, API endpoint, background processing, Docker, and CI remain deferred
+> **Project Status:** Rails API foundation implemented; Docker and CI complete; domain, provider, API endpoint, and background processing remain deferred
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -62,7 +62,7 @@ A planned production-oriented Ruby on Rails API that will retrieve cryptocurrenc
 
 # Project Overview
 
-The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, FactoryBot, safe environment placeholders, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, background-processing infrastructure, Docker configuration, or CI configuration.
+The repository currently contains the Rails API-only foundation, PostgreSQL configuration, Ruby and Bundler dependency manifests, RSpec smoke verification, SimpleCov, RuboCop, Brakeman, FactoryBot, safe environment placeholders, Docker configuration, CI configuration, and project documentation. It does not yet contain domain models, provider clients, service/repository layers, the `/prices/:symbol` endpoint, or background-processing infrastructure.
 
 The target Cryptocurrency Price API is a Rails API-only application designed to provide a reliable endpoint for retrieving the latest known price of a cryptocurrency.
 
@@ -431,7 +431,45 @@ Never commit `.env`, credentials, API keys, tokens, or production secrets.
 
 ## Docker
 
-Docker support is not part of the Issue #2 foundation and no `Dockerfile` or `docker-compose.yml` exists yet. Add Docker instructions only when the Docker issue implements those files.
+Build and start the application with Docker Compose:
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+The Rails application is available at `http://localhost:3001`. The health check endpoint is at `/up`.
+
+Prepare the database:
+
+```bash
+docker compose exec web bin/rails db:prepare
+```
+
+Run the test suite:
+
+```bash
+docker compose exec web bundle exec rspec
+```
+
+Run static analysis:
+
+```bash
+docker compose exec web bundle exec rubocop
+docker compose exec web bundle exec brakeman
+```
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+To remove the database volume:
+
+```bash
+docker compose down -v
+```
 
 ---
 

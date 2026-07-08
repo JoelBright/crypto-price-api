@@ -1,0 +1,13 @@
+.git
+.github
+.bundle
+.env
+.env.*
+coverage
+log
+tmp
+storage
+vendor
+node_modules
+docs
+development

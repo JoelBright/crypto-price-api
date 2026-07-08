@@ -514,8 +514,8 @@ implementation, test, and documentation item has been completed.
 | NFR-004 | Service Layer Separation               | Code Review          | ☐      |
 | NFR-005 | Repository Pattern                     | Code Review          | ☐      |
 | NFR-006 | Dependency Injection where appropriate | Code Review          | ☐      |
-| NFR-007 | Dockerized Application                 | Docker Build         | ☐      |
-| NFR-008 | GitHub Actions Pipeline                | CI Build             | ☐      |
+| NFR-007 | Dockerized Application                 | Docker Build         | ☑      |
+| NFR-008 | GitHub Actions Pipeline                | CI Build             | ☑      |
 | NFR-009 | RuboCop Passes                         | Static Analysis      | ☐      |
 | NFR-010 | Brakeman Passes                        | Security Scan        | ☐      |
 | NFR-011 | SimpleCov Coverage ≥95%                | Automated Test Suite | ☐      |
@@ -560,9 +560,9 @@ implementation, test, and documentation item has been completed.
 
 | Item                               | Complete |
 | ---------------------------------- | -------- |
-| Docker Build Successful            | ☐        |
-| Docker Compose Starts Successfully | ☐        |
-| GitHub Actions Passing             | ☐        |
+| Docker Build Successful            | ☑        |
+| Docker Compose Starts Successfully | ☑        |
+| GitHub Actions Passing             | ☑        |
 | All Tests Passing                  | ☐        |
 | Coverage ≥95%                      | ☐        |
 | RuboCop Passing                    | ☐        |
