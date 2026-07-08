@@ -219,19 +219,19 @@ This guide uses accepted target choices where decisions are approved and marks u
 | -------------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
 | Web framework              | Rails API mode                   | Rails provides routing, ActiveRecord, ActiveJob, configuration, and conventions.       |
 | Durable storage            | PostgreSQL                       | Reliable relational storage and a realistic production database.                       |
-| Background execution       | ActiveJob adapter to be selected | ActiveJob is the accepted abstraction; concrete adapter decision is proposed/deferred. |
-| Scheduling                 | Scheduler to be selected         | A scheduler is required; concrete scheduler decision is proposed/deferred.             |
-| Background queue and cache | Backend to be selected           | Cache and queue infrastructure must be accepted before configuration is created.       |
+| Background execution       | Solid Queue 1.4+                 | Database-backed Active Job backend; default in Rails 8. No Redis required.             |
+| Scheduling                 | Solid Queue recurring tasks      | Built-in recurring scheduling via `config/recurring.yml`. No separate scheduler gem.   |
+| Background queue and cache | Solid Queue for queue; Memory Store for cache | PostgreSQL-backed queue; Rails Memory Store for cache with PostgreSQL fallback. |
 | HTTP client                | Faraday                          | Explicit timeout configuration and testable provider communication.                    |
 | Test framework             | RSpec                            | Standard Ruby behaviour-driven testing.                                                |
 | Test fixtures              | FactoryBot                       | Clear, repeatable model creation.                                                      |
 | Coverage                   | SimpleCov                        | Enforces test-coverage visibility.                                                     |
 | Linting                    | RuboCop                          | Ruby code-quality checks.                                                              |
 | Security scanning          | Brakeman                         | Rails-focused static security analysis.                                                |
-| Containers                 | Docker Compose                   | Target reproducible services after supporting-service decisions are accepted.          |
+| Containers                 | Docker Compose                   | Web and jobs services with PostgreSQL. No Redis required.                              |
 | CI                         | GitHub Actions                   | Automated checks on remote pushes and pull requests.                                   |
 
-Redis, Sidekiq, Solid Queue, scheduler configuration, worker processes, and background Docker services are unresolved at the documentation-only stage. Select and document those decisions in the Engineering Journal before adding implementation files or infrastructure.
+The background infrastructure decisions have been validated in Issue #5. See ADR-017 and ADR-018 in `ENGINEERING_JOURNAL.md` for full rationale.
 
 ---
 

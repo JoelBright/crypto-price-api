@@ -189,7 +189,7 @@ The following rules apply:
 | ADR-002 | PostgreSQL as Durable Price Storage                       | Accepted | 2026-07-07 | Persistence                 |
 | ADR-003 | Cache-First Read Strategy                                 | Accepted | 2026-07-07 | Performance and Reliability |
 | ADR-004 | Background Refresh Instead of Request-Time Provider Calls | Accepted | 2026-07-07 | Reliability                 |
-| ADR-005 | Cache and Background Infrastructure Backend               | Proposed | 2026-07-07 | Infrastructure              |
+| ADR-005 | Cache and Background Infrastructure Backend               | Superseded | 2026-07-07 | Infrastructure              |
 | ADR-006 | Service-Layer Orchestration                               | Accepted | 2026-07-07 | Architecture                |
 | ADR-007 | Repository Boundary for Persistence                       | Accepted | 2026-07-07 | Architecture                |
 | ADR-008 | Dedicated CoinGecko Provider Client                       | Accepted | 2026-07-07 | External Integration        |
@@ -197,10 +197,12 @@ The following rules apply:
 | ADR-010 | Persist Before Updating Cache                             | Accepted | 2026-07-07 | Data Integrity              |
 | ADR-011 | One Current Record per Symbol, Currency, and Provider     | Accepted | 2026-07-07 | Data Model                  |
 | ADR-012 | Decimal Storage for Price Data                            | Accepted | 2026-07-07 | Data Model                  |
-| ADR-013 | Sidekiq and Sidekiq Scheduler                             | Proposed | 2026-07-07 | Background Processing       |
+| ADR-013 | Sidekiq and Sidekiq Scheduler                             | Superseded | 2026-07-07 | Background Processing       |
 | ADR-014 | RSpec, SimpleCov, RuboCop, and Brakeman Quality Stack     | Accepted | 2026-07-07 | Quality                     |
 | ADR-015 | Docker Compose Development Environment                    | Accepted | 2026-07-07 | Developer Experience        |
 | ADR-016 | GitHub Actions Continuous Integration                     | Accepted | 2026-07-07 | Continuous Integration      |
+| ADR-017 | Solid Queue with Built-In Recurring Scheduling            | Accepted | 2026-07-08 | Background Processing       |
+| ADR-018 | Rails Memory Store for Cache                              | Accepted | 2026-07-08 | Caching                     |
 
 ---
 
@@ -671,6 +673,53 @@ Affected areas:
 - [ ] Configure Rails cache store after the decision is accepted.
 - [ ] Configure queue backend after the background adapter decision is accepted.
 - [ ] Add environment variables only after accepted configuration requires them.
+
+---
+
+## Superseded By
+
+This decision has been superseded by:
+
+- **ADR-017** (Solid Queue with Built-In Recurring Scheduling) — Solid Queue replaces Sidekiq and eliminates the need for a Redis queue backend.
+- **ADR-018** (Rails Memory Store for Cache) — Rails Memory Store replaces Redis as the cache store for Version 1.0. Redis for cache remains deferred (DD-011).
+
+## Validation Evidence
+
+### Validation Date
+
+2026-07-08
+
+### Gem Version Compatibility
+
+- Solid Queue 1.4.0 is compatible with Rails 8.1.3 and Ruby 3.4.4.
+- No Redis gem is required for Solid Queue operation.
+- No Sidekiq gem is required for Solid Queue operation.
+
+### Redis Role Determination
+
+- **Queue role**: Not needed. Solid Queue is database-backed and uses PostgreSQL rather than Redis.
+- **Cache role**: Not needed for Version 1.0. Rails Memory Store is sufficient for single-server development environments. Redis cache-store integration is deferred (DD-011) until performance profiling or multi-server deployment warrants it.
+
+### Docker Service Impact
+
+- Solid Queue worker runs from the same Docker image as the web process, using `bin/jobs`.
+- No Redis Docker service is required.
+- Docker Compose adds a `jobs` service but no `redis` service.
+
+### Worker/Scheduler Process Model
+
+- Solid Queue provides a supervisor process that manages workers, dispatchers, and a recurring-task scheduler within a single `bin/jobs` process.
+- Built-in recurring scheduling in Solid Queue 1.4+ replaces the need for sidekiq-scheduler or any external scheduler gem.
+
+### Retry Behaviour Approach
+
+- Solid Queue relies on Active Job's built-in retry mechanism (`retry_on`, `discard_on`).
+- No additional retry configuration outside standard Active Job patterns.
+
+### Scheduler Test Strategy
+
+- Recurring task configuration can be loaded and verified without real-time waits.
+- Job delegation can be tested using Active Job's test helper (`perform_enqueued_jobs`).
 
 ---
 
@@ -1404,10 +1453,28 @@ Before accepting this decision:
 
 ## Follow-Up Actions
 
-- [ ] Validate selected gem versions against the generated Rails version.
+- [x] Validate selected gem versions against the generated Rails version.
 - [ ] Start Sidekiq worker in Docker.
 - [ ] Add schedule configuration.
-- [ ] Convert status to Accepted after successful local verification.
+- [x] Convert status to Accepted after successful local verification.
+
+---
+
+## Superseded By
+
+This decision has been superseded by **ADR-017** (Solid Queue with Built-In Recurring Scheduling).
+
+### Validation Evidence
+
+- Solid Queue 1.4.0 is compatible with Rails 8.1.3 and Ruby 3.4.4.
+- Solid Queue provides built-in recurring scheduling, eliminating the need for sidekiq-scheduler.
+- Solid Queue is database-backed, eliminating the need for a Redis queue backend.
+- Solid Queue is the default Active Job backend for Rails 8 applications, providing deeper Rails integration.
+- No Sidekiq-specific configuration (config/sidekiq.yml) is required.
+
+### Licence Note
+
+Solid Queue uses the MIT license. Sidekiq 8.x uses LGPL-3.0, which was a secondary consideration in the decision to select Solid Queue.
 
 ---
 
@@ -1573,7 +1640,7 @@ It is particularly valuable for a junior developer attempting to recreate the pr
 - Clear infrastructure dependencies.
 - Easier onboarding.
 - Better CI and deployment parity.
-- Isolated PostgreSQL and Redis services.
+- Isolated PostgreSQL and Solid Queue services.
 
 ### Trade-Offs
 
@@ -1599,8 +1666,8 @@ Affected areas:
 ## Verification
 
 - `docker compose up --build` starts required services.
-- Rails can connect to PostgreSQL and Redis.
-- Sidekiq can execute a job.
+- Rails can connect to PostgreSQL.
+- Solid Queue can execute a job.
 - API responds locally.
 - Fresh clone can be bootstrapped using documented commands.
 
@@ -1670,7 +1737,7 @@ GitHub Actions is sufficient for a small Rails project and demonstrates automate
 
 ### Trade-Offs
 
-- Workflow setup must handle PostgreSQL and Redis dependencies.
+- Workflow setup must handle PostgreSQL dependencies.
 - CI failures require environment-specific debugging.
 
 ### Risks
@@ -1691,7 +1758,7 @@ Affected areas:
 ## Verification
 
 - Workflow runs on push and pull request.
-- PostgreSQL and Redis services are available to tests.
+- PostgreSQL is available to tests.
 - RSpec, RuboCop, Brakeman, and coverage checks pass.
 - CI does not call live CoinGecko.
 
@@ -1705,12 +1772,206 @@ Affected areas:
 
 - [ ] Add CI workflow.
 - [ ] Configure PostgreSQL service.
-- [ ] Configure Redis service.
 - [ ] Run CI after initial test suite exists.
 
 ---
 
-# 22. Implementation Decision Template
+# 22. ADR-017 — Solid Queue with Built-In Recurring Scheduling
+
+## Status
+
+Accepted
+
+## Date
+
+2026-07-08
+
+## Context
+
+The project requires a concrete Active Job backend and a recurring scheduler to refresh cryptocurrency prices every minute (FR-004). The application must survive transient provider failures (FR-007) and remain available when the external API is temporarily unreachable.
+
+Previously proposed options (ADR-005, ADR-013) evaluated Sidekiq with redis-rb for queueing and caching, and sidekiq-scheduler for recurring job scheduling. Both decisions were marked Proposed pending infrastructure validation after the Docker, CI, and Rails foundation phases completed.
+
+## Decision
+
+Use **Solid Queue 1.4.0** as the Active Job backend with its built-in recurring scheduling for one-minute price refreshes. Solid Queue is the default Active Job backend for Rails 8 applications and provides recurring task scheduling without external dependencies.
+
+## Alternatives Considered
+
+| Alternative                               | Benefits                                                          | Drawbacks                                                                                                  | Decision     |
+| ----------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------ |
+| ActiveJob inline adapter                  | Simple test behaviour.                                            | Does not provide real asynchronous processing or scheduling.                                               | Rejected     |
+| Solid Queue with built-in scheduling      | Database-backed, no Redis required, Rails 8 default, MIT license. | Requires queue database schema; polling-based rather than push-based.                                      | **Selected** |
+| Sidekiq 8.1.6 with sidekiq-scheduler 6.0  | Mature Redis-backed queue and established recurring-job approach. | Adds Redis service, LGPL-3.0 license, additional Docker service, and sidekiq-scheduler gem dependency.     | Rejected     |
+| Cron invoking Rails runner                | Familiar operating-system scheduling.                             | Harder local Docker orchestration and weaker queue/retry integration.                                      | Rejected     |
+
+## Rationale
+
+Solid Queue was selected over Sidekiq for the following reasons:
+
+1. **No Redis dependency** — Eliminates an entire infrastructure service from Docker Compose, reducing operational complexity and Docker build time.
+2. **Built-in recurring scheduling** — Solid Queue 1.4+ includes a scheduler that manages recurring tasks via `config/recurring.yml`. No separate scheduler gem (sidekiq-scheduler, rufus-scheduler) is required.
+3. **Rails 8 default** — Solid Queue is the default Active Job backend in Rails 8.1.3. It receives deep framework integration and Rails core maintenance.
+4. **Database-backed architecture** — Uses PostgreSQL for job storage alongside application data. For this single-server interview project, a shared database approach (single `DATABASE_URL`) is appropriate at Version 1.0 scale.
+5. **Simpler Docker services** — Solid Queue's `bin/jobs` supervisor process replaces both a Redis container and a Sidekiq container. The same Docker image serves web and worker processes.
+6. **MIT license** — Aligns with the project's existing MIT-licensed dependencies. Sidekiq 8.x uses LGPL-3.0.
+7. **Active Job compatibility** — Solid Queue works with the same `perform_later`, `retry_on`, and `discard_on` patterns that Sidekiq supports, keeping job code adapter-agnostic.
+
+## Consequences
+
+### Positive Consequences
+
+- Single infrastructure dependency (PostgreSQL) for both application data and job queue.
+- No Redis configuration, credential management, or health-check maintenance.
+- Built-in recurring scheduling integrated with Rails configuration.
+- Supervisor process manages workers, dispatchers, and scheduler in one process.
+- MIT license consistent with project dependencies.
+
+### Trade-Offs
+
+- Solid Queue uses polling to dispatch scheduled jobs, which is slightly less efficient than Sidekiq's Redis-backed push model.
+- Requires a queue database schema migration (`db/queue_schema.rb`).
+- The shared-database approach means higher PostgreSQL connection count.
+- Fewer operational debugging tools than Sidekiq's mature Web UI.
+
+### Risks
+
+- Polling interval configuration must balance responsiveness against database load.
+- Database contention under heavy queue load would require a separate queue database.
+- Solid Queue's recurring-scheduler feature is newer than sidekiq-scheduler and may have undiscovered edge cases.
+
+## Implementation Impact
+
+Affected areas:
+
+- `Gemfile` — add `solid_queue` gem (no `sidekiq`, `sidekiq-scheduler`, or `redis` gems).
+- `config/queue.yml` — Solid Queue configuration.
+- `config/recurring.yml` — one-minute schedule for `PriceRefreshJob`.
+- `docker-compose.yml` — add `jobs` service running `bin/jobs`.
+- No Redis service required.
+- No `config/sidekiq.yml` required.
+- `config/environments/production.rb` — set `config.active_job.queue_adapter = :solid_queue`.
+- `.github/workflows/ci.yml` — no Redis service container needed.
+- Solid Queue worker documentation in `docs/BACKGROUND_JOBS.md` and `docs/JUNIOR_DEVELOPER_GUIDE.md`.
+
+## Verification
+
+- `bundle exec rails generate solid_queue:install` generates expected configuration.
+- Rails boots with `:solid_queue` as the queue adapter.
+- `PriceRefreshJob` can be enqueued via `perform_later`.
+- `config/recurring.yml` loads the one-minute schedule without errors.
+- `docker compose up` starts web and jobs services successfully.
+- `bin/rails jobs:work` processes enqueued jobs.
+- RSpec `perform_enqueued_jobs` works with the Solid Queue test helper.
+
+## Related Documents
+
+- `docs/BACKGROUND_JOBS.md`
+- `docs/JUNIOR_DEVELOPER_GUIDE.md`
+- `docs/TESTING.md`
+- `docs/ARCHITECTURE.md`
+- `docs/PROJECT_SPECIFICATIONS.md`
+
+## Follow-Up Actions
+
+- [ ] Add `solid_queue` gem to `Gemfile`.
+- [ ] Generate Solid Queue configuration (`bin/rails solid_queue:install`).
+- [ ] Configure `config/recurring.yml` with one-minute schedule.
+- [ ] Add `jobs` service to `docker-compose.yml`.
+- [ ] Configure `config.active_job.queue_adapter = :solid_queue` in production environment.
+- [ ] Mark JOB-009 (Select scheduling mechanism) as completed in WBS.
+- [ ] Update `docs/BACKGROUND_JOBS.md` with Solid Queue specifics.
+- [ ] Update `docs/JUNIOR_DEVELOPER_GUIDE.md` with background processing setup.
+
+---
+
+# 23. ADR-018 — Rails Memory Store for Cache
+
+## Status
+
+Accepted
+
+## Date
+
+2026-07-08
+
+## Context
+
+The application requires a cache store for the cache-first read strategy (ADR-003). The cache abstraction (`PriceCache`) will read and write price entries through this store. The cache backend decision was left as Proposed in ADR-005, which evaluated Redis as a candidate for both queue and cache roles.
+
+With Solid Queue accepted as the background adapter (ADR-017), Redis is no longer required for queueing. The cache store decision must be resolved independently.
+
+## Decision
+
+Use **Rails Memory Store** as the cache store for Version 1.0. Redis for cache is deferred (DD-011) until performance profiling or multi-server deployment warrants reconsideration.
+
+## Alternatives Considered
+
+| Alternative                   | Benefits                                                     | Drawbacks                                                                                    | Decision     |
+| ----------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ------------ |
+| Rails Memory Store (default)  | Zero configuration, no external dependency, process-local.   | Cache is process-local and cleared on restart. PostgreSQL provides durable fallback.         | **Selected** |
+| Redis cache store             | Shared cache across processes, persistent across restarts.   | Adds Redis Docker service, configuration, and credential management for interview-scale use. | Deferred     |
+| Solid Cache (database-backed) | Database-backed, no Redis, Rails 8 compatible.               | Adds migration overhead and database load disproportionate to Version 1.0 caching needs.     | Rejected     |
+| File store                    | Simple filesystem persistence.                               | Not suitable for multi-process, not cache-oriented.                                          | Rejected     |
+
+## Rationale
+
+Rails Memory Store is the simplest cache backend that satisfies the project's requirements. The cache-first strategy (ADR-003) has a built-in durability guarantee: PostgreSQL is the durable fallback when the cache is empty or unavailable. This means even if the Memory Store is cleared on process restart, the application recovers by reading from the database and repopulating the cache.
+
+Adding Redis or Solid Cache for cache storage would introduce infrastructure and configuration overhead without a demonstrated performance need at Version 1.0 scale.
+
+## Consequences
+
+### Positive Consequences
+
+- No additional cache infrastructure beyond the Rails process.
+- Zero configuration for the cache store.
+- PostgreSQL durability guarantees that cache loss is recoverable.
+- Simplified Docker Compose (no Redis cache service).
+
+### Trade-Offs
+
+- Memory Store is process-local; multiple web workers each have their own cache.
+- Cache is cleared on process restart.
+- Not suitable for horizontally scaled deployments without introducing a shared cache backend.
+
+### Risks
+
+- If the web process restarts frequently, the cache miss rate increases and the database handles more read traffic.
+- Memory Store could consume significant memory if cache entries accumulate without expiry.
+
+## Implementation Impact
+
+Affected areas:
+
+- `config/environments/development.rb` — default Memory Store (no change).
+- `config/environments/production.rb` — set `config.cache_store = :memory_store`.
+- `PriceCache` abstraction — uses `Rails.cache` which defaults to Memory Store.
+- `docs/ARCHITECTURE.md` — document that Memory Store is the accepted backend, with PostgreSQL as durable fallback.
+
+## Verification
+
+- `Rails.cache` returns a `ActiveSupport::Cache::MemoryStore` instance.
+- Cache read/write operations succeed.
+- Cache miss correctly falls back to PostgreSQL.
+- Cache repopulation from persisted data works after restart.
+- RSpec tests use `:memory_store` for deterministic cache behaviour.
+
+## Related Documents
+
+- `docs/ARCHITECTURE.md`
+- `docs/BACKGROUND_JOBS.md`
+- `docs/TESTING.md`
+
+## Follow-Up Actions
+
+- [ ] Confirm `config.cache_store` is unset or set to `:memory_store` in development and production.
+- [ ] Update `PriceCache` documentation references.
+- [ ] Verify cache-miss fallback in service specs.
+
+---
+
+# 24. Implementation Decision Template
 
 Use this section when a smaller implementation choice does not require a full ADR but should still be recorded.
 
@@ -1809,7 +2070,8 @@ The following decisions are intentionally deferred until the project has a demon
 | DD-007 | Add metrics and tracing platform.         | Application is deployed beyond interview demonstration scope.             |
 | DD-008 | Add Kubernetes manifests.                 | Deployment moves to an orchestrated multi-service platform.               |
 | DD-009 | Add API version prefix.                   | Backward-incompatible public API change is required.                      |
-| DD-010 | Replace Sidekiq with another job adapter. | Compatibility, licensing, operational, or project constraints change.     |
+| DD-010 | Replace Solid Queue with another job adapter.            | Compatibility, licensing, operational, or project constraints change.     |
+| DD-011 | Use Redis as the cache store.                            | Multi-process deployment, performance profiling, or cache-miss rate requires a shared cache backend. |
 
 Deferred decisions are not unfinished work. They are deliberately excluded from Version 1.0 scope.
 

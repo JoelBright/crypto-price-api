@@ -233,20 +233,20 @@ The final scheduler implementation must enqueue `PriceRefreshJob` at this interv
 
 ## Scheduler Selection
 
-The specific scheduling mechanism will be selected during implementation based on compatibility with the chosen ActiveJob adapter and Docker development environment.
+Solid Queue 1.4+ provides built-in recurring scheduling through `config/recurring.yml`. No separate scheduler gem is required.
 
-The selected mechanism must satisfy all of the following:
+The accepted scheduler mechanism is Solid Queue's built-in recurring task scheduler (see ADR-017 in `ENGINEERING_JOURNAL.md`). The scheduler satisfies all project requirements:
 
 | Requirement           | Expected Behaviour                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------- |
 | Interval support      | Can enqueue work every minute.                                                      |
 | Rails integration     | Works cleanly with Rails configuration and ActiveJob.                               |
-| Local reproducibility | Can run in Docker and local development.                                            |
-| Testability           | Scheduler configuration can be validated without relying on timing-sensitive tests. |
+| Local reproducibility | Can run in Docker and local development via `bin/jobs`.                             |
+| Testability           | Recurring task configuration can be validated without relying on timing-sensitive tests. |
 | Failure isolation     | One failed refresh does not permanently stop future scheduled executions.           |
-| Operational clarity   | Configuration is understandable to a junior developer.                              |
+| Operational clarity   | Configuration is understandable to a junior developer in `config/recurring.yml`.    |
 
-The scheduler decision must be recorded in `ENGINEERING_JOURNAL.md`.
+The scheduler decision has been recorded and accepted in `ENGINEERING_JOURNAL.md`.
 
 ---
 
