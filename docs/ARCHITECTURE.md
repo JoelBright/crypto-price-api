@@ -257,6 +257,20 @@ The refresh service must not:
 
 The external provider client encapsulates CoinGecko-specific behaviour.
 
+Implementation location:
+
+```text
+app/clients/coin_gecko_client.rb
+```
+
+The client exposes a narrow public interface:
+
+```ruby
+fetch_price(symbol:, currency: "usd")
+```
+
+The method returns normalized application-level data containing `symbol`, `price`, `currency`, `provider`, and `fetched_at`. Prices are represented as `BigDecimal`; `symbol` and `currency` are normalized to the application's uppercase internal convention, and `provider` is returned as `coingecko`.
+
 Responsibilities:
 
 - Build external requests.
@@ -267,12 +281,25 @@ Responsibilities:
 - Convert provider failures into application-specific exceptions.
 - Avoid leaking raw HTTP-client errors to service code.
 
+The supported Version 1.0 symbol mapping is intentionally small:
+
+| Application Symbol | CoinGecko Identifier |
+| ------------------ | -------------------- |
+| `BTC`              | `bitcoin`            |
+| `ETH`              | `ethereum`           |
+
+Provider communication uses Faraday with environment-driven configuration. `COINGECKO_API_KEY` supplies the provider credential and must never be logged, returned, or included in raised exception messages. Request and open timeouts are configurable, and retry behaviour is bounded.
+
+Provider-specific failures are translated into controlled application exceptions under `ProviderError`, including configuration, unsupported symbol, HTTP, timeout, network, parse, and malformed-response failures.
+
 The client must not:
 
 - Persist data.
 - Update cache.
 - Render JSON.
 - Decide public API status codes.
+- Call repositories or cache abstractions.
+- Be invoked from the public request path.
 
 ---
 

@@ -335,6 +335,20 @@ spec/clients/coin_gecko_client_spec.rb
 
 Tests must use mocked HTTP responses. They must never depend on live CoinGecko calls.
 
+The implemented provider-client specs use deterministic injected Faraday-compatible doubles and focused JSON fixtures under:
+
+```text
+spec/fixtures/files/coingecko/
+```
+
+The client specs cover successful parsing, unsupported symbols, missing API-key configuration, HTTP failures, timeout failures, network failures, invalid JSON, malformed responses, missing provider IDs or currencies, invalid and non-positive prices, bounded retry attempts, and API-key redaction from errors and logs.
+
+Provider-client validation command:
+
+```bash
+RAILS_ENV=test bundle exec rspec spec/clients/coin_gecko_client_spec.rb
+```
+
 ---
 
 ## Service Specifications
