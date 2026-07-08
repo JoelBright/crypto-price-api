@@ -52,6 +52,7 @@ Describe the implementation at a high level.
 - [ ] bundle exec brakeman
 - [ ] bin/rails db:prepare
 - [ ] git diff --check
+- [ ] YAML syntax validated (if configuration files changed)
 
 ---
 
@@ -73,6 +74,8 @@ Summarize the results.
 
 - [ ] TESTING.md
 
+- [ ] CONTRIBUTING.md
+
 - [ ] Other
 
 ---
@@ -81,8 +84,6 @@ Summarize the results.
 
 List the requirements satisfied.
 
-Example:
-
 | Requirement           | Status |
 | --------------------- | ------ |
 | Rails API foundation  | ✅     |
@@ -90,6 +91,17 @@ Example:
 | Test framework        | ✅     |
 | RuboCop               | ✅     |
 | Brakeman              | ✅     |
+
+---
+
+## Governance Compliance
+
+- [ ] Branch protection rules are documented (if applicable)
+- [ ] Dependabot configuration is valid (if applicable)
+- [ ] Issue templates are present and valid (if applicable)
+- [ ] CODEOWNERS is accurate (if applicable)
+- [ ] No secrets committed
+- [ ] `.env` and `config/master.key` remain ignored
 
 ---
 
@@ -110,4 +122,5 @@ Known limitations or risks.
 - [ ] Tests pass
 - [ ] Documentation updated
 - [ ] Validation completed
+- [ ] Governance compliance items reviewed (if applicable)
 - [ ] Ready to merge

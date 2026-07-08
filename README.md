@@ -2,7 +2,7 @@
 
 A planned production-oriented Ruby on Rails API that will retrieve cryptocurrency prices from CoinGecko, store the latest known values, serve cached responses, and remain available when the external provider is temporarily unavailable.
 
-> **Project Status:** Rails API foundation implemented; Docker and CI complete; domain, provider, API endpoint, and background processing remain deferred
+> **Project Status:** Rails API foundation, Docker, CI, and repository governance complete; domain, provider, API endpoint, and background processing remain deferred
 > **Target Release:** Version 1.0.0 — Interview Release
 > **Primary Use Case:** Demonstrate production-quality Rails API design, background processing, caching, graceful degradation, automated testing, containerization, and developer documentation.
 
@@ -368,7 +368,10 @@ crypto-price-api/
 │   └── support/
 │
 ├── .github/
-│   └── workflows/
+│   ├── workflows/
+│   ├── ISSUE_TEMPLATE/
+│   ├── dependabot.yml
+│   └── pull_request_template.md
 │
 ├── Gemfile
 ├── Gemfile.lock
@@ -665,6 +668,11 @@ GitHub Actions will run the defined quality gates automatically once continuous 
 | [`development/ENGINEERING_PRINCIPLES.md`](development/ENGINEERING_PRINCIPLES.md)               | Engineering standards, decision rules, and quality expectations.  |
 | [`development/FEATURE_CHECKLIST.md`](development/FEATURE_CHECKLIST.md)                         | High-level delivery and progress dashboard.                       |
 | [`development/RELEASE_CHECKLIST.md`](development/RELEASE_CHECKLIST.md)                         | Final release certification and interview-readiness verification. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)                                                           | Contribution workflow, branch strategy, and governance settings.  |
+| [`CODEOWNERS`](CODEOWNERS)                                                                     | Code ownership and PR review routing.                             |
+| [Issue Templates](.github/ISSUE_TEMPLATE/)                                                     | Standard templates for bug reports and feature requests.          |
+| [Pull Request Template](.github/pull_request_template.md)                                      | Standard pull request description template.                       |
+| [Dependabot Configuration](.github/dependabot.yml)                                             | Automated dependency update configuration.                        |
 
 ---
 

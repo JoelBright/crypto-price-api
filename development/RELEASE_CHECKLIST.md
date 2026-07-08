@@ -90,6 +90,9 @@ Verify that implementation has been completed.
 | Repository contains no debugging artifacts | ☐      |
 | Repository structure reviewed              | ☐      |
 | Git history reviewed                       | ☐      |
+| Repository governance settings documented  | ☐      |
+| Branch protection rules verified           | ☐      |
+| Dependabot configuration valid             | ☐      |
 
 ---
 
