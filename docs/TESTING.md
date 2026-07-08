@@ -362,9 +362,17 @@ Required coverage:
 - Cache hit returns the cached price.
 - Cache miss with stored record returns persisted price.
 - Cache miss with stored record repopulates cache.
-- Cache miss with no stored record raises or returns the documented not-found result.
+- Cache miss with no stored record returns the documented not-found result (`PriceQueryService::Result` with `found?` false).
 - Cache failure uses persistence fallback where the selected strategy supports it.
+- Cache repopulation failure does not prevent returning the persisted record.
 - Symbol normalization occurs consistently before lookup.
+- Provider (CoinGecko) is never called during query.
+
+Current implementation status:
+
+- `PriceQueryService` is implemented with cache-first, repository-fallback, cache-repopulation, and graceful cache-failure handling.
+- The service returns `PriceQueryService::Result` (a `Data.define` value object) with `found?` and `not_found?` predicates.
+- All critical scenarios are covered by service specs.
 
 Target location:
 
@@ -378,13 +386,20 @@ Required coverage:
 
 - Valid provider response persists price.
 - Successful persistence updates cache.
-- Cache is updated from persisted data.
+- Cache is updated from persisted data, not from raw provider data.
 - Provider timeout preserves old database and cache values.
 - Malformed provider response is not persisted.
 - Persistence failure does not write unpersisted provider data to cache.
 - Cache failure does not invalidate a successfully persisted value.
-- Successful refresh reports predictable success information.
+- Successful refresh reports predictable success information (`PriceRefreshService::Result` with `success?` true).
 - Controlled provider failure reports predictable failure information.
+- Service does not know controllers, HTTP responses, or scheduler concepts.
+
+Current implementation status:
+
+- `PriceRefreshService` is implemented with provider-first, persist-before-cache ordering, and graceful degradation.
+- The service returns `PriceRefreshService::Result` (a `Data.define` value object) with `success?` and `failure?` predicates, a `price_record`, and an `error` object.
+- All critical scenarios are covered by service specs.
 
 Target location:
 

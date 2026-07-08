@@ -1322,4 +1322,106 @@ Expected result:
 - Updating cache from the provider client.
 - Requiring a real API key in automated tests.
 - Allowing raw Faraday or JSON parser exceptions to escape the provider boundary.
-- Logging request headers or provider response bodies that may contain secrets.
+
+---
+
+# 17. Implement Application Services
+
+## Goal
+
+Create the service layer that orchestrates caching, persistence, and provider interactions.
+
+---
+
+## Why This Exists
+
+Services coordinate application behaviour while keeping controllers, background jobs, repositories, and provider clients focused on their own responsibilities.
+
+The query service owns the read path — cache-first reads with database fallback. The refresh service owns the write path — provider fetches, persistence, and cache updates.
+
+---
+
+## Files
+
+Create:
+
+```text
+app/services/price_query_service.rb
+app/services/price_refresh_service.rb
+spec/services/price_query_service_spec.rb
+spec/services/price_refresh_service_spec.rb
+```
+
+---
+
+## PriceQueryService Contract
+
+```ruby
+service = PriceQueryService.new(repository: CryptoPriceRepository.new, cache: PriceCache.new)
+result = service.query(symbol: "BTC", currency: "USD", provider: "coingecko")
+
+result.found?      # true when a price exists
+result.not_found?  # true when no price has ever been stored
+result.price_record # cached payload (Hash) or persisted CryptoPrice record
+```
+
+Read order:
+
+1. Check cache.
+2. If cache miss, query repository.
+3. If repository returns a record, repopulate cache.
+4. Return the value, or a not-found result if nothing exists.
+
+---
+
+## PriceRefreshService Contract
+
+```ruby
+service = PriceRefreshService.new(
+  provider_client: CoinGeckoClient.new,
+  repository: CryptoPriceRepository.new,
+  cache: PriceCache.new
+)
+result = service.refresh(symbol: "BTC", currency: "USD")
+
+result.success?       # true when provider data was persisted and cache updated
+result.failure?       # true when provider or persistence failed
+result.price_record   # the persisted CryptoPrice record on success
+result.error          # the controlled exception on failure
+```
+
+Refresh order:
+
+1. Fetch price from provider client.
+2. Persist valid data through repository.
+3. Update cache only after persistence succeeds.
+4. Return the persisted record or a controlled failure.
+
+---
+
+## Verification
+
+```bash
+bundle exec rspec spec/services/price_query_service_spec.rb
+bundle exec rspec spec/services/price_refresh_service_spec.rb
+bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
+
+Expected result:
+
+- All service specs pass: cache hit, cache miss, cache repopulation, no persisted value, cache failure, provider failure, persistence failure, persist-before-cache ordering.
+- The full suite passes.
+- RuboCop reports no offenses.
+- Brakeman reports no warnings.
+
+---
+
+## Common Mistakes
+
+- Calling CoinGecko from the query service.
+- Updating cache before persistence succeeds in the refresh service.
+- Letting raw ActiveRecord exceptions escape the repository boundary.
+- Adding HTTP status codes, controller logic, or scheduler configuration to service code.
+- Creating service objects that duplicate repository, cache, or provider behaviour instead of delegating.
